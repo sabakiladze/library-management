@@ -8,24 +8,22 @@ using static LibraryManagementSystem.Core.Enums.UserRole;
 
 namespace LibraryManagementSystem.Core.Models
 {
-   
-
-    internal abstract class User
+  
+    public class User
     {
-       
+        private static int _idCounter = 0;
+        public int Id { get; private set; }
         private string _userName = string.Empty;
         private string _email = string.Empty;
-        private string _password = string.Empty;
-
-        public int Id { get; set; } 
-
+        public string PasswordHash { get; set; } = string.Empty;
+        public decimal? Fee { get; set; } = 0;
         public string UserName
         {
             get => _userName;
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Password can't be empty!");
+                    throw new ArgumentException("Username can't be empty!");
 
                 if (value.Length < 3 || value.Length > 50)
                     throw new ArgumentException("User must enter min 3 and max 50 charachters!");
@@ -48,31 +46,34 @@ namespace LibraryManagementSystem.Core.Models
                 _email = value;
             }
         }
+        public bool IsActive { get; set; } = false;
 
-        public string Password
-        {
-            get => _password;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("password can't be empty!");
-                if (value.Length < 8)
-                    throw new ArgumentException("password's length must be 8 or more");
+        
 
-                _password = value;
-            }
-        }
-
-        public bool EmailVerified { get; set; } = false;
         public Role Role { get; set; } = Role.Client;
 
-        protected User() { }
 
-        protected User(string name, string email, string password)
+        //public  User() { }
+
+        public User(string name, string email, string password)
         {
+
             UserName = name;
             Email = email;
-            Password = password;
+           
+            _idCounter++;
+            Id = _idCounter;
+            PasswordHash = password;
+            if (Role == Role.Admin)
+            {
+                Fee = null;
+            }
+            else
+            {
+                Fee = 0;
+            }
+
         }
+
     }
 }

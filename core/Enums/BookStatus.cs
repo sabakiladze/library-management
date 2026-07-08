@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace LibraryManagementSystem.Core.Enums
 {
-    public class UserRole
+   public class BookStatus
     {
-        public enum Role
+        public enum Book_Status
         {
-            Client,
-            Admin
+            Available,
+            Pending,
+            Borrowed,
+            Returned,
+            Damaged
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,14 @@ namespace LibraryManagementSystem.Core.Models
 {
     internal class Book
     {
+        private static int _id = 0;
+        public int Id { get;  private set; }
         private string _title = string.Empty;
         private string _author = string.Empty;
+        public bool Available { get; set; } = true;
+        public int PublicationYear { get; set; }
+        public List<BookCopy> Copies { get; set; } = new List<BookCopy>();
 
-        public int Id { get; set; }
 
         public string Title
         {
@@ -36,16 +41,16 @@ namespace LibraryManagementSystem.Core.Models
         }
 
 
-        public int PublicationYear { get; set; }
-        public bool IsAvailable { get; set; } = true;
 
-        public Book() { }
+        //public Book() { }
 
         public Book(string title, string author, int publicationYear)
         {
             Title = title;
             Author = author;
             PublicationYear = publicationYear;
+            _id++;
+            Id = _id;
         }
     }
 }

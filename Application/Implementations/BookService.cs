@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.Core.Exceptions
+namespace Application.Implementations
 {
-    internal class BookNotFound
+    internal class BookService
     {
     }
 }
