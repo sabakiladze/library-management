@@ -1,12 +1,17 @@
-﻿using System;
+﻿using Domain.Models;
+using LibraryManagementSystem.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.Core.Interfaces
+namespace Domain.Interfaces
 {
-    internal interface IFileRepository
+    public interface IFileRepository<T>
     {
+        List<T> GetAllLine();
+        void SaveAll(List<T> data);
+
     }
 }

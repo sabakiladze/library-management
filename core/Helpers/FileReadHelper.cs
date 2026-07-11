@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.Core.Helpers
+namespace LibraryManagementSystem.Domain.Helpers
 {
     internal class FileReadHelper
     {

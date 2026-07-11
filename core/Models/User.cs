@@ -1,12 +1,13 @@
-﻿using LibraryManagementSystem.Core.Enums;
+﻿using LibraryManagementSystem.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static LibraryManagementSystem.Core.Enums.UserRole;
+using System.Text.Json;
+using static LibraryManagementSystem.Domain.Enums.UserRole;
 
-namespace LibraryManagementSystem.Core.Models
+namespace LibraryManagementSystem.Domain.Models
 {
   
     public class User
@@ -46,14 +47,13 @@ namespace LibraryManagementSystem.Core.Models
                 _email = value;
             }
         }
-        public bool IsActive { get; set; } = false;
-
-        
 
         public Role Role { get; set; } = Role.Client;
 
 
         //public  User() { }
+
+        public DateTime RegisterTime { get; set; } = DateTime.Now; 
 
         public User(string name, string email, string password)
         {
@@ -73,6 +73,22 @@ namespace LibraryManagementSystem.Core.Models
                 Fee = 0;
             }
 
+        }
+       
+        public  string ToJson(bool isloggedin)
+        {
+            var obj = new
+            {
+                Id,
+                UserName,
+                Email,
+                PasswordHash,
+                Role,
+                Fee = Fee == null ? "Admin" : $"{Fee} GEL",
+                IsLoggedIn=isloggedin
+
+            };
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = false });
         }
 
     }

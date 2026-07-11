@@ -11,10 +11,8 @@ namespace Domain.Exceptions
 
         public AccountByThisEmailDoNotExists(string message) : base(message) { }
 
-        public AccountByThisEmailDoNotExists() : base("Account by this email do not exists.")
-        {
-            
-        }
+        public AccountByThisEmailDoNotExists() : base("Account by this email do not exists.") { }
+     
         public AccountByThisEmailDoNotExists(string message, Exception inner) : base(message, inner) { }
     }
 

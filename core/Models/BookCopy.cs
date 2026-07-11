@@ -1,14 +1,14 @@
-﻿using LibraryManagementSystem.Core.Enums;
+﻿using LibraryManagementSystem.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static LibraryManagementSystem.Core.Enums.BookStatus;
+using static LibraryManagementSystem.Domain.Enums.BookStatus;
 
 namespace Domain.Models
 {
-    internal class BookCopy
+    public class BookCopy
     {
 
         public Guid Id { get; private set; }

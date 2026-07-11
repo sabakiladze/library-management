@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibraryManagementSystem.DataAccess.Repositories
 {
-    internal class BorrowRepository
+    public class BorrowRepository
     {
     }
 }

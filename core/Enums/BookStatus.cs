@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.Core.Enums
+namespace LibraryManagementSystem.Domain.Enums
 {
    public class BookStatus
     {

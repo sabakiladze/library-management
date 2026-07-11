@@ -1,4 +1,4 @@
-﻿using LibraryManagementSystem.Core.Models;
+﻿using LibraryManagementSystem.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace LibraryManagementSystem.DataAccess.Interfaces
     public interface IAuthService
     {
         void SignUp(string username, string email, string password);
-        User LogIn(string email, string password);
+        void LogIn(string email, string password);
         void LogOut();
     }
 }

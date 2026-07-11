@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Implementations
+namespace Domain.Interfaces
 {
-    internal class BookService
+    public interface IBorrowRepository
     {
     }
 }

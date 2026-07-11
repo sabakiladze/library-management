@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.Core.Models
+namespace LibraryManagementSystem.Domain.Models
 {
-    internal class Book
+    public class Book
     {
         private static int _id = 0;
         public int Id { get;  private set; }
@@ -40,6 +40,16 @@ namespace LibraryManagementSystem.Core.Models
             }
         }
 
+        public override bool Equals(object? obj)
+        {
+            if (!(obj is Book) || obj==null) return false;
+            Book other = (Book)obj;
+            return this.Title == other.Title;
+        }
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
 
 
         //public Book() { }
