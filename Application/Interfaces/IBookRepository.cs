@@ -12,20 +12,20 @@ namespace Application.Interfaces
     public interface IBookRepository
     {
         List<Book> GetAllBook();
-        Book GetBookById(int id);
+        Book? GetBookById(int id);
         List<Book> GetBookByName(string name);
-        BookCopy GetBookCopyByGuid(Guid id);
+        BookCopy? GetBookCopyByGuid(Guid id);
         void DeleteBookById(int id);
         bool DeleteBookCopyByGuidId(Guid id);
 
-        List<Book> GetAllBookCopyByAuthor(string name);
+        List<Book> GetAllBookCopyByAuthor(Author author);
 
-        int GetBookCount();
+        int GetAllBookCount();
         int GetBookCountOfEveryExemplar();
         void AddBook(Book book);
         BookCopy AddCopyBook(BookCopy book, int BookId);
         List<Book> AllBookByPublishedYear(int date);
-        int BookCountById(int id);
+        int BookCount(Book book);
         
     }
 }
