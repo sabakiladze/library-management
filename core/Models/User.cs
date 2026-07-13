@@ -75,20 +75,10 @@ namespace LibraryManagementSystem.Domain.Models
 
         }
        
-        public  string ToJson(bool isloggedin)
+        
+        public User()
         {
-            var obj = new
-            {
-                Id,
-                UserName,
-                Email,
-                PasswordHash,
-                Role,
-                Fee = Fee == null ? "Admin" : $"{Fee} GEL",
-                IsLoggedIn=isloggedin
-
-            };
-            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = false });
+            
         }
 
     }

@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions
 {
-    internal class RecordsDoNotExistsException
+    public class RecordsDoNotExistsException:Exception
     {
+        public RecordsDoNotExistsException():base("Records do not exists yes") { }
+        public RecordsDoNotExistsException(string message) : base(message) { }
+        public RecordsDoNotExistsException(string message, Exception inner) : base(message, inner) { }
     }
 }

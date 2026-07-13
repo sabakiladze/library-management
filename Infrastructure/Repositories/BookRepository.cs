@@ -20,32 +20,35 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         public BookRepository(IFileRepository<Book> filerepository)
         {
             _filerepository = filerepository;
-            _books = _filerepository.GetAllLine();
+            _books = _filerepository.GetAllLine() ?? new List<Book>();
         }
 
         public void AddBook(Book book)
         {
+            if(_books.Contains(book)) 
+                throw new BookAlreadyExistsException();
             _books.Add( book );
             _filerepository.SaveAll(_books);
             
         }
 
-        public BookCopy AddCopyBook(BookCopy book, int BookId)
+        public void AddCopyBook(BookCopy book, int bookId)
         {
-            Book bookcopy=_books.FirstOrDefault(x=>x.Id==BookId);
-            bookcopy.Copies.Add(book);
+            Book? existingBook = _books.FirstOrDefault(x => x.Id == bookId) ?? throw new BookNotFoundException();
+            existingBook.Copies.Add(book);
+
             _filerepository.SaveAll(_books);
-            return book;
+
+           
         }
 
         public List<Book> AllBookByPublishedYear( int date)=>_books.Where(x => x.PublicationYear == date).ToList();
 
         public void DeleteBookById(int id)
         {
-            Book book = _books.FirstOrDefault(x => x.Id == id);
+            Book? book = _books.FirstOrDefault(x => x.Id == id) ?? throw new BookNotFoundException();
             _books.Remove(book);
             _filerepository.SaveAll(_books);
-            
         }
 
         public bool DeleteBookCopyByGuidId(Guid id)
@@ -53,7 +56,7 @@ namespace LibraryManagementSystem.DataAccess.Repositories
             var book = _books.FirstOrDefault(b => b.Copies.Any(c => c.Id == id));
             if(book!=null)
             {
-                var copy = book.Copies.FirstOrDefault(c => c.Id == id);
+                BookCopy ? copy   = book.Copies.FirstOrDefault(c => c.Id == id);
                 book.Copies.Remove(copy);
                 _filerepository.SaveAll(_books);
                 return true; 
@@ -62,19 +65,24 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         }
 
         public List<Book> GetAllBook()=>_books;
-        public List<Book> GetAllBookCopyByAuthor(string name)=> _filerepository.GetAllLine().Where(x => x.Author == name.Trim().ToLower()).ToList();
+        public List<Book> GetAllBookCopyByAuthor(Author author)
+        {
+            return _books.Where(x => x.Author.Equals(author)).ToList();
+        }
+        public Book? GetBookById(int id)=> _books.FirstOrDefault(x => x.Id == id);
 
-        public Book GetBookById(int id)=> _books.FirstOrDefault(x => x.Id == id);
+        public List<Book> GetBookByName(string name)=> _books.Where(x => x.Title.Trim().ToLower() == name.Trim().ToLower()).ToList();
 
-        public List<Book> GetBookByName(string name)=> _books.Where(x => x.Title == name).ToList();
+        public BookCopy? GetBookCopyByGuid(Guid id) => _books.SelectMany(x => x.Copies).FirstOrDefault(y => y.Id == id);
 
-        public BookCopy GetBookCopyByGuid(Guid id) => _books.SelectMany(x => x.Copies).FirstOrDefault(y => y.Id == id);
-
-        public int GetBookCount() => _books.Count;
+        public int GetAllBookCount() => _books.Count;
 
         public int GetBookCountOfEveryExemplar() => _books.SelectMany(x=>x.Copies).Count();
 
-       public int BookCountById(int id) => _books.Count(x => x.Id == id);
+       public int BookCount(Book book) => _books.Count(x => x.Equals(book));
 
+       
+
+       
     }
 }

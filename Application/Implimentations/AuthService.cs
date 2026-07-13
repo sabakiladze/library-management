@@ -12,30 +12,16 @@ using Domain.Models;
 
 namespace LibraryManagementSystem.Services.AuthService
 {
-    public class AuthService : IAuthService
+    public class AuthService(IUserRepository userrepository, UserSession usersession, IFileRepository<LogInLog> logRepo, IFileRepository<User> sign) : IAuthService
     {
-        private readonly IUserRepository _userrepository;
-        private readonly UserSession _userSession;
-        private readonly IFileRepository<LogInLog> _logFileRepository;
-        private readonly IFileRepository<User> _signFileRepository;
-
-        public AuthService(IUserRepository userrepository, UserSession usersession, IFileRepository<LogInLog> logRepo, IFileRepository<User> sign)
-        {
-            _userrepository = userrepository;
-            _userSession = usersession;
-            _logFileRepository = logRepo;
-            _signFileRepository = sign;
-        }
-
-       
+        private readonly IUserRepository _userrepository = userrepository;
+        private readonly UserSession _userSession = usersession;
+        private readonly IFileRepository<LogInLog> _logFileRepository = logRepo;
+        private readonly IFileRepository<User> _signFileRepository = sign;
 
         public void LogIn(string email, string password)
         {
-            User user = _userrepository.GetUserByEmail(email);
-            if (user==null)
-            {
-                throw new AccountByThisEmailDoNotExists();
-            }
+            User ? user = _userrepository.GetUserByEmail(email) ?? throw new AccountByThisEmailDoNotExists();
             if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
                 throw new IncorrectPasswordException();
 
@@ -61,7 +47,7 @@ namespace LibraryManagementSystem.Services.AuthService
             if (_userrepository.GetUserByEmail(email) != null)
                 throw new EmailAlreadyIsInUseException();
             string passwordhash = BCrypt.Net.BCrypt.HashPassword(password);
-            User user = new User(username, email, passwordhash);
+            User user = new(username, email, passwordhash);
 
 
             List<User> users=_signFileRepository.GetAllLine();

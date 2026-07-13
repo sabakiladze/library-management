@@ -10,13 +10,16 @@ namespace Domain.Interfaces
     public interface IBorrowReqordRepository
     {
 
-        void AddBorrowRecord(BorrowRecord record);
+        void Add(BorrowRecord record);
+
         BorrowRecord? GetById(int id);
-        List<BorrowRecord> GetAll();
-        List<BorrowRecord> GetUserBorrowHistory(int userId);
-        List<BorrowRecord> GetActiveBorrowings(int userId);
-        void ReturnBook(int id, DateTime returnDate);
-        List<BorrowRecord> GetOverdueBooks();
+
+        List<BorrowRecord> ?  GetAll();
+
+        List<BorrowRecord> ? GetByUserId(int userId);
+        void Update(BorrowRecord record);
+
+
         ///////// ჯერ უნდა გავაკეთო borrow request და მერე შეიქმნება რექორდი
     }
 }

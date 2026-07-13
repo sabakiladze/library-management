@@ -15,10 +15,10 @@ namespace Domain.Models
         public int BookId { get; private set; }
 
         public Book_Status Status { get; set; } = Book_Status.Available;
-        //public BookCopy()
-        //{
-            
-        //}
+        public BookCopy()
+        {
+
+        }
         public BookCopy(int bookId)
         {
             Id = Guid.NewGuid();

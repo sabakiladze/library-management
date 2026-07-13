@@ -10,9 +10,9 @@ namespace LibraryManagementSystem.Domain.Models
     public class Book
     {
         private static int _id = 0;
-        public int Id { get;  private set; }
+        public int Id { get; private set; }
         private string _title = string.Empty;
-        private string _author = string.Empty;
+        public Author Author;
         public bool Available { get; set; } = true;
         public int PublicationYear { get; set; }
         public List<BookCopy> Copies { get; set; } = new List<BookCopy>();
@@ -28,33 +28,19 @@ namespace LibraryManagementSystem.Domain.Models
                 _title = value;
             }
         }
-
-        public string Author
-        {
-            get => _author;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Author name cannot be empty!");
-                _author = value;
-            }
-        }
-
         public override bool Equals(object? obj)
         {
-            if (!(obj is Book) || obj==null) return false;
-            Book other = (Book)obj;
-            return this.Title == other.Title;
-        }
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
+            if (obj is not Book other) return false;
+            return Title.Equals(other.Title, StringComparison.OrdinalIgnoreCase) &&
+                PublicationYear == other.PublicationYear &&
+                Author.Equals(other.Author);
+
         }
 
 
-        //public Book() { }
+        public Book() { }
 
-        public Book(string title, string author, int publicationYear)
+        public Book(string title, Author author, int publicationYear)
         {
             Title = title;
             Author = author;
@@ -62,5 +48,7 @@ namespace LibraryManagementSystem.Domain.Models
             _id++;
             Id = _id;
         }
+       
+
     }
 }

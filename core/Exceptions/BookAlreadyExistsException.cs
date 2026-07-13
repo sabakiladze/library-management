@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions
 {
-    internal class BookAlreadyExistsException
+    public class BookAlreadyExistsException:Exception
     {
+        public BookAlreadyExistsException() : base("book by this id already exists") { }
+        public BookAlreadyExistsException(string message) : base(message) { }
+        public BookAlreadyExistsException(string message, Exception inner):base(message, inner) { }
+        
     }
 }

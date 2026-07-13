@@ -15,17 +15,19 @@ namespace LibraryManagementSystem.DataAccess.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly IFileRepository<User> _fileRepository;
+        private readonly List<User> _users;
         public UserRepository(IFileRepository<User> file)
         {
            _fileRepository = file;
+            _users = _fileRepository.GetAllLine() ?? new List<User>();
         }
-        public List<User> GetAll() => _fileRepository.GetAllLine();
+        public List<User> ?GetAll() => _users;
 
-        public User GetUserByEmail(string email) => _fileRepository.GetAllLine().FirstOrDefault(x => x.Email == email);
+        public User ? GetUserByEmail(string email) => _users.FirstOrDefault(x => x.Email == email);
 
-        public User GetUserById(int id) => _fileRepository.GetAllLine().FirstOrDefault(x => x.Id == id);
+        public User ? GetUserById(int id) => _users.FirstOrDefault(x => x.Id == id);
 
-        public List<User> GetUserByName(string name) => _fileRepository.GetAllLine().Where(x => x.UserName == name).ToList();
+        public List<User>?  GetUserByName(string name) => _users.Where(x => x.UserName == name).ToList();
 
 
     }

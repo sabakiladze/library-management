@@ -14,5 +14,9 @@ namespace Domain.Models
         {
             Email = email;
         }
+        public LogInLog()
+        {
+            
+        }
     }
 }

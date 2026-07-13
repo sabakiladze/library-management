@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    internal class BookBorrowRequestStatus
+    public class BookBorrowRequestStatus
     {
+        public enum BookBorrowStatus
+        {
+            Pending,
+            Approved,
+            Rejected
+        }
     }
 }

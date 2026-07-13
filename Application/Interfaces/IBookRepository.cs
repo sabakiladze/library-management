@@ -23,7 +23,7 @@ namespace Application.Interfaces
         int GetAllBookCount();
         int GetBookCountOfEveryExemplar();
         void AddBook(Book book);
-        BookCopy AddCopyBook(BookCopy book, int BookId);
+        void AddCopyBook(BookCopy book, int BookId);
         List<Book> AllBookByPublishedYear(int date);
         int BookCount(Book book);
         

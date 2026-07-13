@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions
 {
-    internal class RequestByThisIdDoNotExists
+    public class RequestByThisIdDoNotExists : Exception
     {
+        public RequestByThisIdDoNotExists() : base("Request bu this ID do not exists") { }
+        public RequestByThisIdDoNotExists(string message) : base(message) { }
+        public RequestByThisIdDoNotExists(string message, Exception inner) : base(message, inner) { }
     }
 }

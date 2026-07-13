@@ -9,10 +9,10 @@ namespace Domain.Interfaces
 {
     public interface IUserRepository
     {
-        List<User> GetAll();
-        User GetUserById(int id);
-        List<User> GetUserByName(string name);
-        User GetUserByEmail(string email);
+        List<User> ? GetAll();
+        User ? GetUserById(int id);
+        List<User> ? GetUserByName(string name);
+        User ? GetUserByEmail(string email);
         
     }
 }

@@ -11,14 +11,17 @@ namespace Domain.Interfaces
     {
         void AddRequest(BorrowRequest request);
 
-        List<BorrowRequest> GetAllRequests();
+        List<BorrowRequest> ?GetAllRequests();
 
-        List<BorrowRequest> GetPendingRequests();
+        List<BorrowRequest>? GetPendingRequests();
 
         BorrowRequest? GetRequestById(int id);
 
-        void UpdateRequest(BorrowRequest request);
-
         void DeleteRequest(int id);
+        public List<BorrowRequest>? GetRejectedRequests();
+        public List<BorrowRequest>? GetApprovedRequests();
+
+        void Update(BorrowRequest request);
+        List<BorrowRequest> ? GetRequestsByUserId(int userId);
     }
 }

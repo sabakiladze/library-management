@@ -9,7 +9,7 @@ namespace Infrastructure.Repositories
     public class FileRepository<T> : IFileRepository<T>
     {
         private readonly string _filePath;
-
+        /// ამას კარგად გადავავლო მერე თვალი
         public FileRepository(string fileName)
         {
             string directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files");
@@ -46,7 +46,7 @@ namespace Infrastructure.Repositories
             string json = JsonSerializer.Serialize(data, options);
 
             File.WriteAllText(_filePath, json);
-        }
+        }////ეს თავიდან უნდა გავიარო
     }
 }
 

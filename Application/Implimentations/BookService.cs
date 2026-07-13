@@ -1,123 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Interfaces;
+﻿using Application.Interfaces;
+using Application.Validations;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
+using System.Net;
 using static LibraryManagementSystem.Domain.Enums.UserRole;
 
 namespace Application.Implementations
 {
-    public class BookService :IBookService
+    public class BookService : IBookService
     {
         private readonly IBookRepository _repository;
         private readonly UserSession _userSession;
-        public BookService(IBookRepository repository, UserSession userSession)
+        private readonly Validation _validations;
+
+        public BookService(IBookRepository repository, UserSession userSession, Validation validation)
         {
-            _repository= repository;
-            _userSession=userSession;
+            _repository = repository;
+            _userSession = userSession;
+            _validations = validation;
         }
+
+
         public void AddBook(Book book)
         {
-            EnsureAdmin();
-            if (book == null) throw new ArgumentNullException(nameof(book));
-            _repository.AddBook(book);
+            _validations.EnsureAdmin(_userSession);
+            _validations.EnsureInput(book);
 
+            _repository.AddBook(book);
         }
+
 
         public void AddCopy(BookCopy copy, int bookId)
         {
-            EnsureAdmin();
-            if(copy == null || bookId<=0) throw new ArgumentNullException( nameof(copy));
+            _validations.EnsureAdmin(_userSession);
+            _validations.EnsureInput(copy);
+           _validations. EnsureId(bookId);
+
             _repository.AddCopyBook(copy, bookId);
         }
 
-        public int BookCountById(int id)
+
+        public int BookCountBy(Book book)
         {
-            EnsureAdmin();
-            EnsureId(id);
-                return _repository.BookCountById(id);// ძებნის ერთი წგინი, მაგ"კაც-ადამ" რამდენია
+            _validations.EnsureAdmin(_userSession);
+            _validations.EnsureInput(book);
+
+            return _repository.BookCount(book);
         }
+
 
         public void DeleteBook(int id)
         {
-            EnsureAdmin();
-            EnsureId(id);
+            _validations.EnsureAdmin(_userSession);
+            _validations.EnsureId(id);
+
             _repository.DeleteBookById(id);
         }
 
+
         public bool DeleteBookCopy(Guid id)
         {
-            _repository.DeleteBookCopyByGuidId(id);
-            return true;  /// ესეც კარგად უნდა გავიგო, ბოოლ რომ აბრუნებს
+            _validations.EnsureAdmin(_userSession);
+            return _repository.DeleteBookCopyByGuidId(id);
         }
 
-        public List<Book> GetAllBooks() => _repository.GetAllBook();
 
-        public Book GetBookById(int id)
+        public List<Book> GetAllBooks()
         {
-            EnsureId(id);
+            return _repository.GetAllBook();
+        }
+
+
+        public Book? GetBookById(int id)
+        {
+            _validations.EnsureId(id);
             return _repository.GetBookById(id);
         }
 
-        public BookCopy GetBookCopyByGuid(Guid id)=>_repository.GetBookCopyByGuid(id);
 
-        public List<Book> GetBooksByAuthor(string author)
+        public BookCopy? GetBookCopyByGuid(Guid id)
         {
-            EnsureString(author);
-           return  _repository.GetAllBookCopyByAuthor(author.Trim().ToLower());
+            return _repository.GetBookCopyByGuid(id);
         }
+
+
+        public List<Book> GetBooksByAuthor(Author author)
+        {
+            _validations.EnsureInput(author);
+            return _repository.GetAllBookCopyByAuthor(author);
+        }
+
 
         public List<Book> GetBooksByName(string name)
         {
-            EnsureString(name);
-            return _repository.GetBookByName(name.Trim().ToLower());
+           _validations.EnsureString(name);
+
+            return _repository.GetBookByName(name);
         }
+
 
         public List<Book> GetBooksByYear(int year)
         {
+            if (year <= 0)
+                throw new ArgumentException("Invalid year");
+
             return _repository.AllBookByPublishedYear(year);
         }
 
-        public int GetTotalBookCount(int id)
-        {
-            EnsureAdmin();
-            EnsureId(id);
-            return _repository.BookCountById(id);
-        }
 
         public int GetTotalBookCount()
         {
-            EnsureAdmin();
-            return _repository.GetBookCount();
+            _validations.EnsureAdmin(_userSession);
+            return _repository.GetAllBookCount();
         }
+
 
         public int GetTotalCopiesCount()
         {
-            EnsureAdmin();
+            _validations.EnsureAdmin(_userSession);
             return _repository.GetBookCountOfEveryExemplar();
         }
 
-
-        ///ესენი შეიძ₾ება ვალიდაციებში გადავიტანო
-        private void EnsureAdmin()
-        {
-            if (_userSession.CurrentUser == null || _userSession.CurrentUser.Role != Role.Admin)
-                throw new RoleException();
-
-        }
-        private void EnsureId(int id)
-        {
-            if(id<=0) throw new ArgumentOutOfRangeException("invalid input", nameof(id));
-        }
-        private void EnsureString(string str)
-        {
-            if (string.IsNullOrEmpty(str)) throw new ArgumentNullException("invalid input", nameof(str));
-        }
     }
 }

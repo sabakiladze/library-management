@@ -8,32 +8,55 @@ using System.Threading.Tasks;
 
 namespace LibraryManagementSystem.Domain.Models
 {
-    internal class BorrowRecord
+    public class BorrowRecord
     {
-        private static int _borrowCount = 0;
-        public int Id { get; private set; } // უშუალოდ წაღების
-        public  int User_Id { get; set; }
-        public  int Book_Id {get;set;} //წიგნის დასახელებისთვის
-        public Guid Book_Copy_Id { get;set;}// ეგზემპლარი
+        public int Id { get; private set; }
+
+        public int UserId { get; private set; }
+
+        public int BookId { get; private set; }
+
+        public Guid BookCopyId { get; private set; }
+
         public DateTime BorrowDate { get; private set; }
 
         public DateTime DueDate { get; private set; }
-        public DateTime? ActualReturnDate { get; set; }
-        public bool IsOverdue => ActualReturnDate == null
-            ? DateTime.UtcNow > DueDate
-            : ActualReturnDate > DueDate;
-        public BorrowRecord(int userId, int bookId, Guid bookCopyId, int loanDays = 14)
-        {
-            _borrowCount++;
-            Id = _borrowCount;
 
-            User_Id = userId;
-            Book_Id = bookId;
-            Book_Copy_Id = bookCopyId;
+        public DateTime? ActualReturnDate { get; private set; }
+
+
+        public bool IsReturned => ActualReturnDate != null;
+
+
+        public bool IsOverdue =>
+            !IsReturned && DateTime.UtcNow > DueDate
+            ||
+            IsReturned && ActualReturnDate > DueDate;
+
+
+
+        public BorrowRecord(
+            int id,
+            int userId,
+            int bookId,
+            Guid bookCopyId,
+            int loanDays = 14)
+        {
+            Id = id;
+
+            UserId = userId;
+            BookId = bookId;
+            BookCopyId = bookCopyId;
 
             BorrowDate = DateTime.UtcNow;
-            DueDate = DateTime.UtcNow.AddDays(loanDays); 
-            ActualReturnDate = null; // თავიდან ცხადია null-ია, რადგან ჯერ არ დაუბრუნებია
+            DueDate = BorrowDate.AddDays(loanDays);
+        }
+
+
+        // JSON Serializer-სთვის
+        private BorrowRecord()
+        {
+
         }
     }
 }
