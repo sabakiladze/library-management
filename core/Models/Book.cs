@@ -1,23 +1,23 @@
-﻿using Domain.Models;
+﻿using Domain.Exceptions;
+using Domain.Models;
+using LibraryManagementSystem.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-
+using static LibraryManagementSystem.Domain.Enums.BookStatus;
 namespace LibraryManagementSystem.Domain.Models
 {
     public class Book
     {
-        private static int _id = 0;
+        private static int _idCounter = 0;
         public int Id { get; private set; }
         private string _title = string.Empty;
-        public Author Author;
-        public bool Available { get; set; } = true;
+        public Author Author { get; set; }
         public int PublicationYear { get; set; }
         public List<BookCopy> Copies { get; set; } = new List<BookCopy>();
-
-
         public string Title
         {
             get => _title;
@@ -31,24 +31,66 @@ namespace LibraryManagementSystem.Domain.Models
         public override bool Equals(object? obj)
         {
             if (obj is not Book other) return false;
-            return Title.Equals(other.Title, StringComparison.OrdinalIgnoreCase) &&
-                PublicationYear == other.PublicationYear &&
-                Author.Equals(other.Author);
-
+            return Title.Equals(other.Title, StringComparison.OrdinalIgnoreCase)
+                && PublicationYear == other.PublicationYear
+                && Author.Equals(other.Author);
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Title.ToLower(), PublicationYear, Author);
         }
 
-
-        public Book() { }
-
-        public Book(string title, Author author, int publicationYear)
+        [JsonConstructor]
+        public Book(
+            int id,
+            string title,
+            Author author,
+            int publicationYear,
+            List<BookCopy>? copies)
         {
+            Id = id;
+
             Title = title;
             Author = author;
             PublicationYear = publicationYear;
-            _id++;
-            Id = _id;
-        }
-       
 
+            Copies = copies ?? new List<BookCopy>();
+        }
+
+        public Book(
+            string title,
+            Author author,
+            int publicationYear)
+
+        {
+            Id = ++_idCounter;
+            Title = title;
+            Author = author;
+            PublicationYear = publicationYear;
+        }
+        public static void SyncIdCounter(List<Book> books)
+        {
+            int maxId = books.Select(x => x.Id).
+                DefaultIfEmpty(0).Max();
+            if (maxId > _idCounter)
+                _idCounter = maxId;
+        }
+        public void AddCopy(BookCopy copy)
+        {
+            if (copy == null)
+                throw new BookNotFoundException();
+
+            Copies.Add(copy);
+        }
+        public void RemoveCopy(Guid copyId)
+        {
+            BookCopy? copy = Copies.FirstOrDefault(x => x.Id == copyId) ?? throw new BookNotFoundException();
+            Copies.Remove(copy);
+        }
+        public bool HasAvailableCopy()
+        {
+            return Copies.Any(x => x.Status == Book_Status.Available);
+        }
     }
 }
+

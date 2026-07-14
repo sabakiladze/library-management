@@ -1,12 +1,7 @@
 ﻿using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models;
-using LibraryManagementSystem.Domain.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Domain.Enums.BookBorrowRequestStatus;
 
 namespace Infrastructure.Repositories
@@ -15,84 +10,109 @@ namespace Infrastructure.Repositories
     {
         private readonly IFileRepository<BorrowRequest> _fileRepository;
         private readonly List<BorrowRequest> _borrowRequests;
-        
-        public BorrowRequestRepository(IFileRepository<BorrowRequest> filerepository)
+
+
+        public BorrowRequestRepository(IFileRepository<BorrowRequest> fileRepository)
         {
-            _fileRepository = filerepository;
+            _fileRepository = fileRepository;
             _borrowRequests = _fileRepository.GetAllLine() ?? new List<BorrowRequest>();
+
+            BorrowRequest.SyncIdCounter(_borrowRequests);
         }
+
+
+
         public void AddRequest(BorrowRequest request)
         {
             _borrowRequests.Add(request);
-            _fileRepository.SaveAll(_borrowRequests);
+            Save();
         }
+
+
 
         public void DeleteRequest(int id)
         {
-            BorrowRequest request = _borrowRequests.First(x => x.Id == id) ?? throw new RequestByThisIdDoNotExists();
+            var request = GetRequestById(id);
+
             _borrowRequests.Remove(request);
+
+            Save();
         }
 
-        public List<BorrowRequest>? GetAllRequests()
+
+
+        public List<BorrowRequest> GetAllRequests()
         {
-            List<BorrowRequest> requests = _borrowRequests;
-            if (requests.Count == 0) throw new RequestByThisParametrsDoNotExists();
-            return requests;
+            return _borrowRequests;
         }
 
-        public List<BorrowRequest>? GetApprovedRequests()
+
+
+        public List<BorrowRequest> GetApprovedRequests()
         {
-            List<BorrowRequest> requsts = _borrowRequests.Where(x => x.Status == BookBorrowStatus.Approved).ToList();
-            if (requsts.Count == 0)
-                throw new RequestByThisParametrsDoNotExists();
-            return requsts;
+            return _borrowRequests
+                .Where(x => x.Status == BookBorrowStatus.Approved)
+                .ToList();
         }
 
-        public List<BorrowRequest>? GetRequestsByUser(int UserId)
+
+
+        public List<BorrowRequest> GetPendingRequests()
         {
-            var request = _borrowRequests.Where(x => x.UserId == UserId).ToList() ?? throw new InvalidUserException();
-            return request;
+            return _borrowRequests
+                .Where(x => x.Status == BookBorrowStatus.Pending)
+                .ToList();
         }
 
-        public List<BorrowRequest>? GetPendingRequests()
+
+
+        public List<BorrowRequest> GetRejectedRequests()
         {
-            List<BorrowRequest> requsts = _borrowRequests.Where(x => x.Status == BookBorrowStatus.Pending).ToList();
-            if (requsts.Count == 0)
-                throw new RequestByThisParametrsDoNotExists();
-            return requsts;
-        }
-        public List<BorrowRequest>? GetRejectedRequests()
-        {
-            List<BorrowRequest> requsts = _borrowRequests.Where(x => x.Status == BookBorrowStatus.Rejected).ToList();
-            if (requsts.Count == 0)
-                throw new RequestByThisParametrsDoNotExists();
-            return requsts;
+            return _borrowRequests
+                .Where(x => x.Status == BookBorrowStatus.Rejected)
+                .ToList();
         }
 
-        public BorrowRequest? GetRequestById(int id)
+
+
+        public List<BorrowRequest> GetRequestsByUserId(int userId)
         {
-            BorrowRequest? request = _borrowRequests.FirstOrDefault(x => x.Id == id);
-            return request ?? throw new RequestByThisIdDoNotExists();
+            return _borrowRequests
+                .Where(x => x.UserId == userId)
+                .ToList();
         }
+
+
+
+        public BorrowRequest GetRequestById(int id)
+        {
+            return _borrowRequests
+                .FirstOrDefault(x => x.Id == id)
+                ?? throw new RequestByThisIdDoNotExists();
+        }
+
+
+
         public void Update(BorrowRequest request)
         {
-            var existingRequest = _borrowRequests
-                .FirstOrDefault(x => x.Id == request.Id) ?? throw new RequestByThisParametrsDoNotExists() ;
-
-            existingRequest.Status=BookBorrowStatus.Approved;
+            var index = _borrowRequests
+                .FindIndex(x => x.Id == request.Id);
 
 
-            _fileRepository.SaveAll(_borrowRequests);
-            // ამას გამოვიყენებ approve მეთოდშ რომ ადმინა დაადასტუროს მოთხოვნა
+            if (index == -1)
+                throw new RequestByThisIdDoNotExists();
 
 
+            _borrowRequests[index] = request;
+
+            Save();
         }
 
-        public List<BorrowRequest>? GetRequestsByUserId(int userId)
+
+
+        private void Save()
         {
-            var existingRequest = _borrowRequests
-                .Where(x => x.UserId == userId).ToList() ?? throw new RequestByThisIdDoNotExists();
-            return existingRequest;
+            _fileRepository.SaveAll(_borrowRequests);
         }
     }
 }

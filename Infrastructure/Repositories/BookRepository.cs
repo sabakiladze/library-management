@@ -14,74 +14,102 @@ namespace LibraryManagementSystem.DataAccess.Repositories
 {
     public class BookRepository : IBookRepository
     {
-        private readonly IFileRepository<Book> _filerepository;
+        private readonly IFileRepository<Book> _fileRepository;
         private readonly List<Book> _books;
 
-        public BookRepository(IFileRepository<Book> filerepository)
+        public BookRepository(IFileRepository<Book> fileRepository)
         {
-            _filerepository = filerepository;
-            _books = _filerepository.GetAllLine() ?? new List<Book>();
+            _fileRepository = fileRepository;
+            _books = _fileRepository.GetAllLine() ?? new List<Book>();
         }
+
 
         public void AddBook(Book book)
         {
-            if(_books.Contains(book)) 
+            if (Exists(book))
                 throw new BookAlreadyExistsException();
-            _books.Add( book );
-            _filerepository.SaveAll(_books);
-            
+
+            _books.Add(book);
+            Save();
         }
 
-        public void AddCopyBook(BookCopy book, int bookId)
-        {
-            Book? existingBook = _books.FirstOrDefault(x => x.Id == bookId) ?? throw new BookNotFoundException();
-            existingBook.Copies.Add(book);
-
-            _filerepository.SaveAll(_books);
-
-           
-        }
-
-        public List<Book> AllBookByPublishedYear( int date)=>_books.Where(x => x.PublicationYear == date).ToList();
 
         public void DeleteBookById(int id)
         {
-            Book? book = _books.FirstOrDefault(x => x.Id == id) ?? throw new BookNotFoundException();
+            var book = GetBookById(id) ?? throw new BookNotFoundException();
+
             _books.Remove(book);
-            _filerepository.SaveAll(_books);
+            Save();
         }
 
-        public bool DeleteBookCopyByGuidId(Guid id)
+
+        public List<Book> GetAllBook() => _books;
+
+
+        public Book? GetBookById(int id) =>
+            _books.FirstOrDefault(x => x.Id == id);
+
+
+        public List<Book> GetBookByName(string name) =>
+            _books.Where(x =>
+                x.Title.Equals(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+
+        public List<Book> GetAllBooksByAuthor(Author author) =>
+            _books.Where(x => x.Author.Equals(author)).ToList();
+
+
+        public List<Book> GetBooksByPublishedYear(int year) =>
+            _books.Where(x => x.PublicationYear == year).ToList();
+
+
+        public BookCopy? GetBookCopyByGuid(Guid id) =>
+            _books.SelectMany(x => x.Copies)
+                  .FirstOrDefault(x => x.Id == id);
+
+
+        public Book GetBookContainingCopy(Guid id) =>
+            _books.FirstOrDefault(x =>
+                x.Copies.Any(c => c.Id == id))
+            ?? throw new BookNotFoundException();
+
+
+        public int GetAllBookCount() =>
+            _books.Count;
+
+
+        public int GetTotalCopiesCount() =>
+            _books.SelectMany(x => x.Copies).Count();
+
+
+        public int Count(Book book) =>
+            _books.Count(x => x.Equals(book));
+
+
+        public bool Exists(Book book) =>
+            _books.Contains(book);
+
+
+        public void Update(Book book)
         {
-            var book = _books.FirstOrDefault(b => b.Copies.Any(c => c.Id == id));
-            if(book!=null)
-            {
-                BookCopy ? copy   = book.Copies.FirstOrDefault(c => c.Id == id);
-                book.Copies.Remove(copy);
-                _filerepository.SaveAll(_books);
-                return true; 
-            }
-            return false; /// ეს კარგად უნდა გავიგო,
-        }
+            var index = _books.FindIndex(x => x.Id == book.Id);
 
-        public List<Book> GetAllBook()=>_books;
-        public List<Book> GetAllBookCopyByAuthor(Author author)
+            if (index == -1)
+                throw new BookNotFoundException();
+
+            _books[index] = book;
+
+            Save(); // რადგან copu ს სტატუსი შეიცვალა და copy არის book ის ელემენტი მთლიანი წიგნის ობიექტი უნდა დავააფდეითოდ. 
+        }
+        public int GetToTalCopiesCount()
         {
-            return _books.Where(x => x.Author.Equals(author)).ToList();
+            return _books
+                .SelectMany(x => x.Copies)
+                .Count();
         }
-        public Book? GetBookById(int id)=> _books.FirstOrDefault(x => x.Id == id);
-
-        public List<Book> GetBookByName(string name)=> _books.Where(x => x.Title.Trim().ToLower() == name.Trim().ToLower()).ToList();
-
-        public BookCopy? GetBookCopyByGuid(Guid id) => _books.SelectMany(x => x.Copies).FirstOrDefault(y => y.Id == id);
-
-        public int GetAllBookCount() => _books.Count;
-
-        public int GetBookCountOfEveryExemplar() => _books.SelectMany(x=>x.Copies).Count();
-
-       public int BookCount(Book book) => _books.Count(x => x.Equals(book));
-
-       
+        private void Save() =>
+            _fileRepository.SaveAll(_books);
 
        
     }

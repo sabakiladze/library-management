@@ -1,59 +1,81 @@
 ﻿using Domain.Exceptions;
 using Domain.Interfaces;
 using LibraryManagementSystem.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryManagementSystem.DataAccess.Repositories
 {
     public class BorrowRecordRepository : IBorrowReqordRepository
     {
         private readonly IFileRepository<BorrowRecord> _fileRepository;
-        private readonly List<BorrowRecord> _borrowRecord;
+        private readonly List<BorrowRecord> _borrowRecords;
 
-        public BorrowRecordRepository(IFileRepository<BorrowRecord> borrow)
+
+        public BorrowRecordRepository(IFileRepository<BorrowRecord> fileRepository)
         {
-            _fileRepository = borrow;
-            _borrowRecord = _fileRepository.GetAllLine() ?? new List<BorrowRecord>();
+            _fileRepository = fileRepository;
+
+            _borrowRecords = _fileRepository.GetAllLine()
+                ?? new List<BorrowRecord>();
+
+            BorrowRecord.SyncIdCounter(_borrowRecords);
         }
+
+
+
         public void Add(BorrowRecord record)
         {
-            _borrowRecord.Add(record);
-            _fileRepository.SaveAll(_borrowRecord);
+            _borrowRecords.Add(record);
 
+            Save();
         }
 
-        public List<BorrowRecord> ? GetAll()
+
+
+        public List<BorrowRecord> GetAll()
         {
-            List<BorrowRecord> records = _borrowRecord ?? throw new RecordsDoNotExistsException();
-            return records;
+            return _borrowRecords;
         }
 
-        public BorrowRecord? GetById(int id)
+
+
+        public BorrowRecord GetById(int id)
         {
-            BorrowRecord records = _borrowRecord.First(x => x.Id == id) ?? throw new RecordsDoNotExistsException();
-            return records;
+            return _borrowRecords
+                .FirstOrDefault(x => x.Id == id)
+                ?? throw new RecordsDoNotExistsException();
         }
 
-        public List<BorrowRecord> ? GetByUserId(int userId)
+
+
+        public List<BorrowRecord> GetByUserId(int userId)
         {
-            //List < BorrowRecord > records= _borrowRecord.Where(x => x.User_Id == userId).ToList() ?? throw new InvalidUserIdOrUserHasNotHaveAnyRecordYet();
-            return records;
-
-
+            return _borrowRecords
+                .Where(x => x.UserId == userId)
+                .ToList();
         }
+
 
 
         public void Update(BorrowRecord record)
         {
-            var existingRecord = _borrowRecord.FirstOrDefault(x => x.Id == record.Id) ?? throw new RecordsDoNotExistsException();
-            //existingRecord.ActualReturnDate = record.ActualReturnDate;
+            int index = _borrowRecords
+                .FindIndex(x => x.Id == record.Id);
 
-            _fileRepository.SaveAll(_borrowRecord);
-            // ამას გამოვიყენებ სერვისში რათა დაბრუნებული წიგნის დრო შევიყვანო, როდის მოიტანა
+
+            if (index == -1)
+                throw new RecordsDoNotExistsException();
+
+
+            _borrowRecords[index] = record;
+
+            Save();
+        }
+
+
+
+        private void Save()
+        {
+            _fileRepository.SaveAll(_borrowRecords);
         }
     }
 }

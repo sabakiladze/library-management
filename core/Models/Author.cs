@@ -10,10 +10,10 @@ namespace Domain.Models
     public class Author
     {
 
-        private string _firstname;
-        private string _lastname;
+        private string? _firstname;
+        private string ?_lastname;
 
-        public string FirstName
+        public string ? FirstName
         {
             get => _firstname;
             set
@@ -23,23 +23,26 @@ namespace Domain.Models
             }
 
         }
-        public string LastName
+        public string ? LastName
         {
             get => _lastname;
             set
             {
-                if (!String.IsNullOrEmpty(_lastname))
+                if (!String.IsNullOrEmpty(value))
                     _lastname = value;
             }
         }
         public override bool Equals(object? obj)
         {
-            if (obj is not Author other) return false;
-            return FirstName == other.FirstName && LastName == other.LastName;
+            if (obj is not Author other)
+                return false;
+
+            return FirstName.Equals(other.FirstName, StringComparison.OrdinalIgnoreCase)
+                && LastName.Equals(other.LastName, StringComparison.OrdinalIgnoreCase);
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(FirstName, LastName);
+            return HashCode.Combine(FirstName.ToLower(), LastName.ToLower());
         }
     }
 }

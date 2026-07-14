@@ -10,30 +10,33 @@ namespace Domain.Interfaces
 {
     public interface IBookService
     {
-        void AddBook(Book book);
+        public interface IBookService
+        {
+            void AddBook(Book book);
 
-        void AddCopy(BookCopy copy, int bookId);
+            void AddCopy(BookCopy copy, int bookId);
 
-        int BookCountBy(Book book);
+            void DeleteBook(int id);
 
-        void DeleteBook(int id);
+            void DeleteCopy(Guid copyId);
 
-        bool DeleteBookCopy(Guid id);
+            List<Book> GetAllBooks();
 
-        List<Book> GetAllBooks();
+            Book? GetBookById(int id);
 
-        Book? GetBookById(int id);
+            BookCopy? GetCopyById(Guid copyId);
 
-        BookCopy? GetBookCopyByGuid(Guid id);
+            List<Book> GetBooksByAuthor(Author author);
 
-        List<Book> GetBooksByAuthor(Author author);
+            List<Book> GetBooksByName(string name);
 
-        List<Book> GetBooksByName(string name);
+            List<Book> GetBooksByPublishedYear(int year);
 
-        List<Book> GetBooksByYear(int year);
+            int GetTotalBookCount();
 
-        int GetTotalBookCount();
+            int GetTotalCopieCount();
 
-        int GetTotalCopiesCount();
+            int Count(Book book);
+        }
     }
 }

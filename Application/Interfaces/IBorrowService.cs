@@ -10,12 +10,12 @@ namespace LibraryManagementSystem.DataAccess.Interfaces
 {
     public interface IBorrowService
     {
-        void RequestBook(int bookId, Guid copyId);
-        List<BorrowRequest> GetMyRequests();
-        List<BorrowRecord> GetMyRecords();
+        void RequestBook(int bookId);
+        List<BorrowRequest> ? GetMyRequests();
+        List<BorrowRecord> ? GetMyRecords();
         void ReturnBook(int recordId);
 
-        List<BorrowRequest> GetPendingRequests();
+        List<BorrowRequest> ? GetPendingRequests();
         void ApproveRequest(int requestId);
         void RejectRequest(int requestId);
     }

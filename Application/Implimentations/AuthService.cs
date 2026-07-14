@@ -33,7 +33,6 @@ namespace LibraryManagementSystem.Services.AuthService
 
             Console.WriteLine("succesfully loged out");
 
-          
         }
 
         public void LogOut()

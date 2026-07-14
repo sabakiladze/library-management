@@ -11,10 +11,8 @@ namespace LibraryManagementSystem.Domain.Enums
         public enum Book_Status
         {
             Available,
-            Pending,
             Borrowed,
-            Returned,
-            Damaged
+            Unavailable
         }
     }
 }

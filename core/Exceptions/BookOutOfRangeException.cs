@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions
 {
-    public class BookOutOfRange:Exception
+    public class BookOutOfRangeException:Exception
     {
-        public BookOutOfRange():base("this book is out of range") { }
-        public BookOutOfRange(string message) : base(message) { }
-        public BookOutOfRange(string message, Exception inner):base(message, inner) { }
+        public BookOutOfRangeException():base("this book is out of range") { }
+        public BookOutOfRangeException(string message) : base(message) { }
+        public BookOutOfRangeException(string message, Exception inner):base(message, inner) { }
     }
 }

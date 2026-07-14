@@ -16,16 +16,16 @@ namespace Application.Interfaces
         List<Book> GetBookByName(string name);
         BookCopy? GetBookCopyByGuid(Guid id);
         void DeleteBookById(int id);
-        bool DeleteBookCopyByGuidId(Guid id);
-
-        List<Book> GetAllBookCopyByAuthor(Author author);
-
+        List<Book> GetAllBooksByAuthor(Author author);
         int GetAllBookCount();
-        int GetBookCountOfEveryExemplar();
+        int GetToTalCopiesCount();
         void AddBook(Book book);
-        void AddCopyBook(BookCopy book, int BookId);
-        List<Book> AllBookByPublishedYear(int date);
-        int BookCount(Book book);
-        
+        int Count(Book book);
+        bool Exists(Book book);
+        public void Update(Book book);
+        public Book GetBookContainingCopy(Guid id);
+        public List<Book> GetBooksByPublishedYear(int year);
+
+
     }
 }
