@@ -24,20 +24,7 @@ namespace LibraryManagementSystem.Domain.Models
 
         public DateTime? ActualReturnDate { get; private set; }
 
-        public decimal Fee
-        {
-            get
-            {
-                DateTime endDate = ActualReturnDate ?? DateTime.UtcNow;
-
-                if (endDate <= DueDate)
-                    return 0;
-
-                int overdueDays = (endDate.Date - DueDate.Date).Days;
-
-                return overdueDays * 1m;
-            }
-        }
+        public decimal Fee { get; private set; }
 
         // არ ჩაიწერება JSON-ში, გამოითვლება
         public bool IsReturned => ActualReturnDate != null;
@@ -117,6 +104,27 @@ namespace LibraryManagementSystem.Domain.Models
 
             if (maxId > _count)
                 _count = maxId;
+        }
+
+        public decimal CalculateFee()
+        {
+            DateTime endDate;
+
+            if (ActualReturnDate != null)
+            {
+                endDate = ActualReturnDate.Value;
+            }
+            else
+            {
+                endDate = DateTime.UtcNow;
+            }
+
+            if (endDate <= DueDate)
+                return 0;
+
+            int overdueDays = (endDate.Date - DueDate.Date).Days;
+
+            return overdueDays * 1m;
         }
     }
 }

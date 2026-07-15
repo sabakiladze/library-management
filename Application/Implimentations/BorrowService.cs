@@ -23,19 +23,22 @@ namespace Application.Implimentations
         private readonly IBorrowRequestRepository _borrowRequestRepo;
         private readonly IBorrowReqordRepository _borrowReqordRepo;
         private readonly IBookRepository _bookRepository;
+        private readonly IUserRepository _userRepository;
 
         public BorrowService(
             Validation validation, 
             UserSession userSession, 
             IBorrowRequestRepository borrowRequestRepo,
             IBorrowReqordRepository borrowReqordRepo,
-            IBookRepository bookRepository)
+            IBookRepository bookRepository,
+            IUserRepository userRepository)
         {
             _validations = validation;
             _userSession = userSession;
             _borrowRequestRepo = borrowRequestRepo;
             _borrowReqordRepo = borrowReqordRepo;
             _bookRepository = bookRepository; 
+            _userRepository = userRepository;
         }
         public void ApproveRequest(int requestId)
         {
@@ -104,7 +107,15 @@ namespace Application.Implimentations
         }
 
         public void RequestBook(int bookId)
+
         {
+            User user = _userRepository.GetUserById(_userSession.CurrentUser.Id);
+
+            if (user.HasDebt())
+                throw new UserMustPayFineFirst();
+            if (_userSession.CurrentUser.HasDebt())
+                throw new UserMustPayFineFirst();
+            
             Book book = _bookRepository.GetBookById(bookId)
                 ?? throw new BookNotFoundException();
 
@@ -144,6 +155,17 @@ namespace Application.Implimentations
 
             copy.Return();
 
+            decimal fee = record.CalculateFee();
+
+            if (fee > 0)
+            {
+                User user = _userRepository.GetUserById(record.UserId)
+                    ?? throw new UserNotFound();
+
+                user.AddFee(fee);
+
+                _userRepository.Update(user);
+            }
 
             Book book =
                 _bookRepository.GetBookContainingCopy(copy.Id);

@@ -13,6 +13,8 @@ namespace Domain.Interfaces
         User ? GetUserById(int id);
         List<User> ? GetUserByName(string name);
         User ? GetUserByEmail(string email);
+        void Update(User user);
         
+        void Delete(int id);
     }
 }

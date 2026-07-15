@@ -37,7 +37,9 @@ namespace management_ui_library
             AuthService authService = new(userRepo, userSession, logFileRepo, userFileRepo);
             BookService bookService = new(bookRepo, userSession,validation);
 
-            BorrowService borrowSerice = new(validation, userSession, requestRepo, recordRepo, bookRepo);
+            BorrowService borrowSerice = new(validation, userSession, requestRepo, recordRepo, bookRepo, userRepo);
+            UserService userService = new(userSession, userRepo, validation);
+
             // აქ უნდა დავამატო borrow and request ის ობიექტები
 
         }

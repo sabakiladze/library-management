@@ -23,11 +23,41 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         }
         public List<User> ?GetAll() => _users;
 
-        public User ? GetUserByEmail(string email) => _users.FirstOrDefault(x => x.Email == email);
+        public User? GetUserByEmail(string email) =>
+            _users.FirstOrDefault(x =>
+                x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 
         public User ? GetUserById(int id) => _users.FirstOrDefault(x => x.Id == id);
 
-        public List<User>?  GetUserByName(string name) => _users.Where(x => x.UserName == name).ToList();
+        public List<User> GetUserByName(string name) =>
+            _users.Where(x =>
+                x.UserName.Equals(name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        public void Update(User user)
+        {
+            int index = _users.FindIndex(x => x.Id == user.Id);
+
+            if (index == -1)
+                throw new UserNotFound();
+
+            _users[index] = user;
+
+            Save();
+
+        }
+        public void Delete(int id)
+        {
+            var user = GetUserById(id) ?? throw new UserNotFound();
+
+            _users.Remove(user);
+
+            Save();
+        }
+        private void Save()
+        {
+            _fileRepository.SaveAll(_users);
+        }
 
 
     }
