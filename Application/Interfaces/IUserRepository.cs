@@ -16,5 +16,6 @@ namespace Domain.Interfaces
         void Update(User user);
         
         void Delete(int id);
+        void Add(User user);
     }
 }

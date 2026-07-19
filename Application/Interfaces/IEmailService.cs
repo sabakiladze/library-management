@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.Services.Implementations
+namespace Application.Interfaces
 {
-    internal class EmailNotificationService
+    public  interface IEmailService
     {
+        void SendVerificationCode(string email, string code);
     }
 }

@@ -20,6 +20,13 @@ namespace LibraryManagementSystem.Domain.Models
 
         public decimal? Fee { get; private set; } = 0;
 
+        public bool IsEmailVerified { get; private set; } = false;
+
+        public string? VerificationCode { get; private set; }
+
+        public DateTime? VerificationCodeExpiresAt { get; private set; }
+
+
         public string UserName
         {
             get => _userName;
@@ -62,12 +69,16 @@ namespace LibraryManagementSystem.Domain.Models
         public User(string name, string email, string password)
         {
             Id = ++_idCounter;
+
             UserName = name;
             Email = email;
             PasswordHash = password;
+
             Role = Role.Client;
             Fee = 0;
+
             RegisterTime = DateTime.UtcNow;
+            IsEmailVerified = false;
         }
 
 
@@ -79,17 +90,30 @@ namespace LibraryManagementSystem.Domain.Models
             string email,
             string passwordHash,
             decimal? fee,
+            bool isEmailVerified,
+            string? verificationCode,
+            DateTime? verificationCodeExpiresAt,
             Role role,
             DateTime registerTime)
         {
             Id = id;
+
             UserName = userName;
             Email = email;
+
             PasswordHash = passwordHash;
+
             Fee = fee;
+
+            IsEmailVerified = isEmailVerified;
+            VerificationCode = verificationCode;
+            VerificationCodeExpiresAt = verificationCodeExpiresAt;
+
             Role = role;
+
             RegisterTime = registerTime;
         }
+
 
 
         public static void SyncIdCounter(List<User> users)
@@ -104,10 +128,12 @@ namespace LibraryManagementSystem.Domain.Models
         }
 
 
+
         public void PromoteToAdmin()
         {
             Role = Role.Admin;
         }
+
 
 
         public void AddFee(decimal amount)
@@ -119,14 +145,59 @@ namespace LibraryManagementSystem.Domain.Models
         }
 
 
+
         public void ClearFee()
         {
             Fee = 0;
         }
 
+
+
         public bool HasDebt()
         {
             return Fee > 0;
+        }
+
+
+
+        public void GenerateVerificationCode()
+        {
+            VerificationCode = Random.Shared
+                .Next(100000, 999999)
+                .ToString();
+
+
+            VerificationCodeExpiresAt =
+                DateTime.UtcNow.AddMinutes(15);
+
+
+            IsEmailVerified = false;
+        }
+
+
+
+        public bool IsVerificationCodeValid(string code)
+        {
+            if (VerificationCode != code)
+                return false;
+
+
+            if (VerificationCodeExpiresAt < DateTime.UtcNow)
+                return false;
+
+
+            return true;
+        }
+
+
+
+        public void VerifyEmail()
+        {
+            IsEmailVerified = true;
+
+            VerificationCode = null;
+
+            VerificationCodeExpiresAt = null;
         }
     }
 }

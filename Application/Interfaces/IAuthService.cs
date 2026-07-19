@@ -12,5 +12,7 @@ namespace LibraryManagementSystem.DataAccess.Interfaces
         void SignUp(string username, string email, string password);
         void LogIn(string email, string password);
         void LogOut();
+        void DeleteAccount();
+        void VerifyEmail(string email, string code);
     }
 }
