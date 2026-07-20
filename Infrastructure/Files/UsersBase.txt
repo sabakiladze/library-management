@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 1,
+    "PasswordHash": "$2a$11$GtNAIfWXR2jflnY9zT178.QBBV0eN1sdebLgSjqFuaBTIC6cJ3DMO",
+    "Fee": 0,
+    "IsEmailVerified": true,
+    "VerificationCode": null,
+    "VerificationCodeExpiresAt": null,
+    "UserName": "saba",
+    "Email": "kiladze.saba2007@gmail.com",
+    "Role": 1,
+    "RegisterTime": "2026-07-20T18:13:10.7122757Z"
+  },
+  {
+    "Id": 3,
+    "PasswordHash": "$2a$11$xIBL1wsmITSYfsPwTlbUKukm82fchSn0oBVqoLSkC56eunEENhx.y",
+    "Fee": 0,
+    "IsEmailVerified": true,
+    "VerificationCode": null,
+    "VerificationCodeExpiresAt": null,
+    "UserName": "saba user",
+    "Email": "kiladze.saba15@gmail.com",
+    "Role": 0,
+    "RegisterTime": "2026-07-20T18:17:44.6884074Z"
+  }
+]

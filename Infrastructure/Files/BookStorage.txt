@@ -1,1 +1,69 @@
-﻿
+[
+  {
+    "Id": 1,
+    "Author": {
+      "FirstName": "\u0022lana steen\u0022",
+      "LastName": "steen"
+    },
+    "PublicationYear": 2026,
+    "Copies": [
+      {
+        "Id": "d50bd992-e0bc-4c01-83f6-b6bb71765d5c",
+        "BookId": 1,
+        "Status": "Available"
+      },
+      {
+        "Id": "4893e13d-dab5-4c8b-90e4-bdf41256e156",
+        "BookId": 1,
+        "Status": "Available"
+      },
+      {
+        "Id": "fccb3a4a-956b-486a-a39a-86c1e114ec30",
+        "BookId": 1,
+        "Status": "Available"
+      },
+      {
+        "Id": "b788762f-ac91-47c3-8a52-8b5f1a08b89b",
+        "BookId": 1,
+        "Status": "Available"
+      }
+    ],
+    "Title": "\u0022c#\u0022"
+  },
+  {
+    "Id": 5,
+    "Author": {
+      "FirstName": "ilia",
+      "LastName": "chavchavadze"
+    },
+    "PublicationYear": 1863,
+    "Copies": [
+      {
+        "Id": "a4c27805-3f56-47a3-90ba-0b33513876f8",
+        "BookId": 5,
+        "Status": "Available"
+      },
+      {
+        "Id": "8046d6a1-5de8-48ad-8ad3-60a1a937d0d2",
+        "BookId": 5,
+        "Status": "Available"
+      },
+      {
+        "Id": "bd62c0b6-6ed1-44a6-87eb-98d6a94209a2",
+        "BookId": 5,
+        "Status": "Available"
+      },
+      {
+        "Id": "d7cd3630-ece5-48fb-9c3e-abcd5d2ecc87",
+        "BookId": 5,
+        "Status": "Available"
+      },
+      {
+        "Id": "ee87ce5b-ef2c-4cfc-908f-0be9dd5a43c6",
+        "BookId": 5,
+        "Status": "Available"
+      }
+    ],
+    "Title": "kacia-adamiani?!"
+  }
+]

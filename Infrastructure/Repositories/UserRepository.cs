@@ -17,10 +17,11 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         private readonly List<User> _users;
         public UserRepository(IFileRepository<User> file)
         {
-           _fileRepository = file;
+            _fileRepository = file;
             _users = _fileRepository.GetAllLine() ?? new List<User>();
             User.SyncIdCounter(_users);
         }
+       
         public List<User> ?GetAll() => _users;
 
         public User? GetUserByEmail(string email) =>

@@ -1,1 +1,18 @@
-﻿
+[
+  {
+    "Id": 1,
+    "UserId": 3,
+    "BookId": 5,
+    "BookCopyId": "a4c27805-3f56-47a3-90ba-0b33513876f8",
+    "Status": "Approved",
+    "RequestDate": "2026-07-20T18:30:05.35623Z"
+  },
+  {
+    "Id": 2,
+    "UserId": 3,
+    "BookId": 5,
+    "BookCopyId": "a4c27805-3f56-47a3-90ba-0b33513876f8",
+    "Status": "Rejected",
+    "RequestDate": "2026-07-20T18:30:24.605286Z"
+  }
+]

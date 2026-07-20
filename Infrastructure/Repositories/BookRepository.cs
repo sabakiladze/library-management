@@ -16,13 +16,22 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         private readonly IFileRepository<Book> _fileRepository;
         private readonly List<Book> _books;
 
+        //public BookRepository(IFileRepository<Book> fileRepository)
+        //{
+        //    _fileRepository = fileRepository;
+        //    _books = _fileRepository.GetAllLine() ?? new List<Book>();
+        //    Book.SyncIdCounter(_books);
+        //}
         public BookRepository(IFileRepository<Book> fileRepository)
         {
             _fileRepository = fileRepository;
+
             _books = _fileRepository.GetAllLine() ?? new List<Book>();
+
+            Console.WriteLine($"BOOKS LOADED: {_books.Count}");
+
             Book.SyncIdCounter(_books);
         }
-
 
         public void AddBook(Book book)
         {

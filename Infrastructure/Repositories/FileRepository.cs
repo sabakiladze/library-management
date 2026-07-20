@@ -1,52 +1,67 @@
 ﻿using Application.Interfaces.Repositories;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace Infrastructure.Repositories
+public class FileRepository<T> : IFileRepository<T>
 {
-    public class FileRepository<T> : IFileRepository<T>
+    private readonly string _filePath;
+
+    public FileRepository(string fileName)
     {
-        private readonly string _filePath;
-        /// ამას კარგად გადავავლო მერე თვალი
-        public FileRepository(string fileName)
+        string directory = @"C:\Users\kilad\Downloads\library-management-fixed-v2\library-management\Infrastructure\Files";
+
+        if (!Directory.Exists(directory))
         {
-            string directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files");
-
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            _filePath = Path.Combine(directory, fileName);
+            Directory.CreateDirectory(directory);
         }
 
-        public List<T> GetAllLine()
-        {
-            if (!File.Exists(_filePath))
-            {
-                return new List<T>();
-            }
+        _filePath = Path.Combine(directory, fileName);
+    }
 
-            try
+
+    public List<T> GetAllLine()
+    {
+        if (!File.Exists(_filePath))
+            return new List<T>();
+
+        try
+        {
+            string text = File.ReadAllText(_filePath);
+
+            var options = new JsonSerializerOptions
             {
-                string text = File.ReadAllText(_filePath);
-                return JsonSerializer.Deserialize<List<T>>(text) ?? new List<T>();
-            }
-            catch (JsonException)
-            {
-                return new List<T>();
-            }
+                Converters =
+                {
+                    new JsonStringEnumConverter()
+                }
+            };
+
+
+            return JsonSerializer.Deserialize<List<T>>(text, options)
+                   ?? new List<T>();
         }
-
-        public void SaveAll(List<T> data)
+        catch (Exception ex)
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(data, options);
+            Console.WriteLine(ex.Message);
+            return new List<T>();
+        }
+    }
 
-            File.WriteAllText(_filePath, json);
-        }////ეს თავიდან უნდა გავიარო
+
+    public void SaveAll(List<T> data)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters =
+            {
+                new JsonStringEnumConverter()
+            }
+        };
+
+
+        string json = JsonSerializer.Serialize(data, options);
+
+        File.WriteAllText(_filePath, json);
     }
 }
-

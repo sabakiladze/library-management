@@ -15,10 +15,4 @@
     <ProjectReference Include="..\core\Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Files\UsersStorage.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
