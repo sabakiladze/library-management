@@ -1,9 +1,8 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Validations;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.Models;
-using LibraryManagementSystem.DataAccess.Interfaces;
 using LibraryManagementSystem.Domain.Models;
 using static Domain.Enums.BookBorrowRequestStatus;
 using static LibraryManagementSystem.Domain.Enums.BookStatus;
@@ -89,16 +88,20 @@ namespace Application.Implimentations
 
         public List<BorrowRecord>? GetMyRecords()
         {
+            _validations.EnsureLoggedIn(_userSession);
+
             return _borrowRecordRepo
-                .GetByUserId(_userSession.CurrentUser.Id);
+                .GetByUserId(_userSession.CurrentUser!.Id);
         }
 
 
 
         public List<BorrowRequest>? GetMyRequests()
         {
+            _validations.EnsureLoggedIn(_userSession);
+
             return _borrowRequestRepo
-                .GetRequestsByUserId(_userSession.CurrentUser.Id)
+                .GetRequestsByUserId(_userSession.CurrentUser!.Id)
                 ?? throw new InvalidUserIdOrUserHasNotHaveAnyRequestsYetException();
         }
 
@@ -139,11 +142,39 @@ namespace Application.Implimentations
 
 
 
+        public void CancelRequest(int requestId)
+        {
+            _validations.EnsureLoggedIn(_userSession);
+
+            BorrowRequest request =
+                _borrowRequestRepo.GetRequestById(requestId)
+                ?? throw new RequestByThisIdDoNotExists();
+
+            User currentUser = _userSession.CurrentUser!;
+            bool isOwnRequest = request.UserId == currentUser.Id;
+            bool isAdmin = currentUser.Role == LibraryManagementSystem.Domain.Enums.UserRole.Role.Admin;
+
+            if (!isOwnRequest && !isAdmin)
+                throw new UnauthorizedAccessException("You can only cancel your own requests.");
+
+            if (request.Status != BookBorrowStatus.Pending)
+                throw new InvalidOperationException("Only pending requests can be cancelled.");
+
+            request.Cancel();
+
+            _borrowRequestRepo.Update(request);
+        }
+
+
+
+
 
         public void RequestBook(int bookId)
         {
+            _validations.EnsureLoggedIn(_userSession);
+
             User user =
-                _userRepository.GetUserById(_userSession.CurrentUser.Id)
+                _userRepository.GetUserById(_userSession.CurrentUser!.Id)
                 ?? throw new UserNotFound();
 
 
@@ -183,13 +214,15 @@ namespace Application.Implimentations
 
         public void ReturnBook(int recordId)
         {
+            _validations.EnsureLoggedIn(_userSession);
+
             BorrowRecord record =
                 _borrowRecordRepo.GetById(recordId)
                 ?? throw new Exception("Record not found");
 
 
 
-            if (record.UserId != _userSession.CurrentUser.Id)
+            if (record.UserId != _userSession.CurrentUser!.Id)
                 throw new UnauthorizedAccessException();
 
 
@@ -206,6 +239,7 @@ namespace Application.Implimentations
 
 
             decimal fee = record.CalculateFee();
+            record.ChargeFee(fee);
 
 
 

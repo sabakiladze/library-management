@@ -7,7 +7,7 @@ using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
 
 
-namespace Application.Interfaces
+namespace Application.Interfaces.Repositories
 {
     public interface IBookRepository
     {

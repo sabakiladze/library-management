@@ -1,11 +1,10 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.Models;
-using LibraryManagementSystem.DataAccess.Interfaces;
 using LibraryManagementSystem.Domain.Models;
 
-namespace LibraryManagementSystem.Services.AuthService
+namespace Application.Implimentations
 {
     public class AuthService(
         IUserRepository userRepository,
@@ -36,7 +35,7 @@ namespace LibraryManagementSystem.Services.AuthService
             _userSession.CurrentUser = user;
 
 
-            LogInLog log = new LogInLog(email);
+            LogInLog log = new(email);
 
             List<LogInLog> logs = _logFileRepository.GetAllLine();
 

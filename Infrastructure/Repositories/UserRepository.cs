@@ -1,6 +1,5 @@
-﻿using Domain.Exceptions;
-using Domain.Interfaces;
-using Domain.Interfaces;
+﻿using Application.Interfaces.Repositories;
+using Domain.Exceptions;
 using LibraryManagementSystem.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,7 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         {
            _fileRepository = file;
             _users = _fileRepository.GetAllLine() ?? new List<User>();
+            User.SyncIdCounter(_users);
         }
         public List<User> ?GetAll() => _users;
 

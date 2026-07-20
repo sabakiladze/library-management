@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace Application.Implimentations
 
         public void SendVerificationCode(string email, string code)
         {
-            using SmtpClient smtp = new SmtpClient(_settings.SmtpServer)
+            using SmtpClient smtp = new(_settings.SmtpServer)
             {
                 Port = _settings.Port,
                 EnableSsl = true,
@@ -31,8 +31,10 @@ namespace Application.Implimentations
              )
             };
 
-            MailMessage message=new MailMessage();
-            message.From = new MailAddress("library.management105@gmail.com","ebei rdyr uiyr ekgl"); 
+            MailMessage message = new()
+            {
+                From = new MailAddress(_settings.Email, "Library Management System")
+            };
             message.To.Add(email);
             message.Subject = "Email Verification";
             message.Body = $"Your verification code is: {code}";

@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Application.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -42,5 +42,13 @@ namespace Application.Validations
             }
         }
 
+        public void EnsureLoggedIn(UserSession current)
+        {
+            if (current.CurrentUser == null)
+            {
+                throw new RoleException("ჯერ უნდა შეხვიდეთ სისტემაში (Login).");
+            }
+        }
+
     }
 }

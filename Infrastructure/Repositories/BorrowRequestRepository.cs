@@ -1,5 +1,5 @@
-﻿using Domain.Exceptions;
-using Domain.Interfaces;
+﻿using Application.Interfaces.Repositories;
+using Domain.Exceptions;
 using Domain.Models;
 using System.Linq;
 using static Domain.Enums.BookBorrowRequestStatus;

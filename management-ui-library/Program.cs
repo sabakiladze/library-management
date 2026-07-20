@@ -7,7 +7,7 @@ using Infrastructure.Repositories;
 using LibraryManagementSystem.DataAccess.Interfaces;
 using LibraryManagementSystem.DataAccess.Repositories;
 using LibraryManagementSystem.Domain.Models;
-using LibraryManagementSystem.Services.AuthService;
+using management_ui_library.Menus;
 using Microsoft.Extensions.Configuration;
 
 
@@ -25,7 +25,7 @@ namespace management_ui_library
                 .Build();
 
            
-            EmailSettings settings = new EmailSettings
+            EmailSettings settings = new()
             {
                 Email = configuration["EmailSettings:Email"],
                 AppPassword = configuration["EmailSettings:AppPassword"],
@@ -34,18 +34,18 @@ namespace management_ui_library
             };
 
 
-            EmailService emailService = new EmailService(settings);
+            EmailService emailService = new(settings);
 
-            UserSession userSession=new UserSession();
+            UserSession userSession=new();
 
-            FileRepository<User> userFileRepo = new("UserStorage.txt");
+            FileRepository<User> userFileRepo = new("UsersStorage.txt");
             FileRepository<Book> bookFileRepo = new("BookStorage.txt");
             FileRepository<LogInLog> logFileRepo = new("LogginInfo.txt");
             FileRepository<BorrowRecord> recordFileRepo = new("BorrowRecordInfo.txt");
             FileRepository<BorrowRequest> requestFileRepo = new("BorrowRequestInfo.txt");
 
 
-            Validation validation = new Validation();
+            Validation validation = new();
 
             UserRepository userRepo = new(userFileRepo);
             BookRepository bookRepo = new(bookFileRepo);
@@ -59,8 +59,11 @@ namespace management_ui_library
             BorrowService borrowSerice = new(validation, userSession, requestRepo, recordRepo, bookRepo, userRepo);
             UserService userService = new(userSession, userRepo, validation);
 
-           
+            UserMenu userMenu = new(bookService, borrowSerice, authService, userSession);
+            AdminMenu adminMenu = new(bookService, borrowSerice, userService, authService, userSession);
+            Menu menu = new(authService, userSession, userMenu, adminMenu);
 
+            menu.Run();
         }
     }
 }

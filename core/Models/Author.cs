@@ -18,7 +18,7 @@ namespace Domain.Models
             get => _firstname;
             set
             {
-                if (!string.IsNullOrEmpty(_firstname))
+                if (!string.IsNullOrEmpty(value))
                     _firstname = value;
             }
 

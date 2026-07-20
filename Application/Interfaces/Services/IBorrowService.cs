@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.DataAccess.Interfaces
+namespace Application.Interfaces.Services
 {
     public interface IBorrowService
     {
@@ -18,5 +18,6 @@ namespace LibraryManagementSystem.DataAccess.Interfaces
         List<BorrowRequest> ? GetPendingRequests();
         void ApproveRequest(int requestId);
         void RejectRequest(int requestId);
+        void CancelRequest(int requestId);
     }
 }

@@ -92,6 +92,14 @@ namespace LibraryManagementSystem.Domain.Models
             ActualReturnDate = DateTime.UtcNow;
         }
 
+        public void ChargeFee(decimal fee)
+        {
+            if (fee < 0)
+                throw new ArgumentException("Fee cannot be negative");
+
+            Fee = fee;
+        }
+
 
 
         public static void SyncIdCounter(List<BorrowRecord> records)

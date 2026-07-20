@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibraryManagementSystem.DataAccess.Interfaces
+namespace Application.Interfaces.Services
 {
     public interface IAuthService
     {

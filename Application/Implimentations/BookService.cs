@@ -1,7 +1,7 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Validations;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
 

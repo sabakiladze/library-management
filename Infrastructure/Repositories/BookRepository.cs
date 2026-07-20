@@ -1,6 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Repositories;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.Repositories;
 using LibraryManagementSystem.Domain.Models;
@@ -21,6 +20,7 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         {
             _fileRepository = fileRepository;
             _books = _fileRepository.GetAllLine() ?? new List<Book>();
+            Book.SyncIdCounter(_books);
         }
 
 

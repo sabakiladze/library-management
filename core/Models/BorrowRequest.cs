@@ -80,6 +80,12 @@ namespace Domain.Models
         }
 
 
+        public void Cancel()
+        {
+            Status = BookBorrowStatus.Cancelled;
+        }
+
+
 
         public static void SyncIdCounter(List<BorrowRequest> requests)
         {
