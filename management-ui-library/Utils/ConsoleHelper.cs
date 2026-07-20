@@ -52,6 +52,12 @@ namespace management_ui_library.Utils
             return (Console.ReadLine() ?? "").Trim();
         }
 
+
+
+
+
+
+
         public static void PrintError(string message)
         {
             ConsoleColor previous = Console.ForegroundColor;
@@ -67,6 +73,13 @@ namespace management_ui_library.Utils
             Console.WriteLine($" {message}");
             Console.ForegroundColor = previous;
         }
+
+
+
+
+
+
+
 
        
         public static bool TryRun(Action action)

@@ -57,7 +57,7 @@ namespace LibraryManagementSystem.DataAccess.Repositories
         public void Add(User user)
         {
             _users.Add(user);
-            _fileRepository.SaveAll(_users);
+            Save();
         }
         private void Save()
         {
