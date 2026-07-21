@@ -46,7 +46,7 @@ namespace Application.Validations
         {
             if (current.CurrentUser == null)
             {
-                throw new RoleException("ჯერ უნდა შეხვიდეთ სისტემაში (Login).");
+                throw new RoleException("first you have to log in system.");
             }
         }
 
