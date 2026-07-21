@@ -62,11 +62,6 @@ namespace Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Previously this had no try-catch at all, so a locked/in-use file
-                // (e.g. antivirus or cloud-sync holding a lock) would either crash
-                // or, depending on the call site, silently swallow the write —
-                // which is exactly what "worked during the session, gone after
-                // restart" looks like. Now it's surfaced instead of hidden.
                 throw new IOException($"Failed to save {Path.GetFileName(_filePath)}: {ex.Message}", ex);
             }
         }

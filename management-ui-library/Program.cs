@@ -45,9 +45,7 @@ namespace management_ui_library
             BorrowRecordRepository recordRepo = new(recordFileRepo);
             BorrowRequestRepository requestRepo = new(requestFileRepo);
 
-            // Repositories load their in-memory lists from disk here. This has
-            // to happen once, up front, before anything tries to read/write —
-            // constructors can't be async in C#, so the load is a separate step.
+            
             await userRepo.InitializeAsync();
             await bookRepo.InitializeAsync();
             await recordRepo.InitializeAsync();

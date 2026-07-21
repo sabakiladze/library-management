@@ -75,7 +75,7 @@ namespace management_ui_library.Utils
         {
             ConsoleColor previous = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"⚠ {message}");
+            Console.WriteLine($" {message}");
             Console.ForegroundColor = previous;
         }
 
@@ -83,7 +83,7 @@ namespace management_ui_library.Utils
         {
             ConsoleColor previous = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"✔ {message}");
+            Console.WriteLine($" {message}");
             Console.ForegroundColor = previous;
         }
 
@@ -115,15 +115,7 @@ namespace management_ui_library.Utils
             }
         }
 
-        /// <summary>
-        /// Runs a full input-and-submit flow. On success, returns normally.
-        /// If the user typed 'cancel' or declined a confirmation, stops
-        /// quietly. On any other failure (bad input reaching a business
-        /// rule, e.g. "book already exists"), prints the error and asks
-        /// whether to try the whole thing again or give up — instead of
-        /// silently dumping everything the user typed and returning to
-        /// the menu.
-        /// </summary>
+       
         public static async Task RunWithRetryAsync(Func<Task> action)
         {
             while (true)
@@ -150,7 +142,7 @@ namespace management_ui_library.Utils
                         Console.WriteLine("Cancelled — nothing was saved.");
                         return;
                     }
-                    // loop: re-run 'action' from the top, re-prompting every field
+                    
                 }
             }
         }

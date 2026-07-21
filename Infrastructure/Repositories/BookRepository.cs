@@ -87,9 +87,7 @@ namespace LibraryManagementSystem.DataAccess.Repositories
 
             _books[index] = book;
 
-            // Copy status lives inside the Book object's Copies list, so any
-            // copy-level change (borrow/return/add/remove) has to re-save the
-            // whole parent Book.
+            
             await SaveAsync();
         }
 

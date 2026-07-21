@@ -78,7 +78,6 @@ namespace management_ui_library.Menus
                 await _authService.SignUpAsync(username, email, password);
 
                 ConsoleHelper.PrintSuccess("Registration successful. A verification code has been sent to your email.");
-                Console.WriteLine("Note: if email isn't actually configured (in appsettings.json), sending the code will fail — contact the admin/developer.");
             });
         }
 

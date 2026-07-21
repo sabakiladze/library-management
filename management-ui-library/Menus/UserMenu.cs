@@ -54,7 +54,7 @@ namespace management_ui_library.Menus
                 Console.WriteLine("10. My fee");
                 Console.WriteLine("11. Delete my account");
                 Console.WriteLine("0. Log out");
-                Console.WriteLine("(tip: type 'cancel' at any prompt to back out of a multi-step action)");
+                Console.WriteLine("(type 'cancel' at any time to back out of a multistep action)");
 
                 string choice = ConsoleHelper.ReadLineOrEmpty("Choose: ");
 
@@ -166,6 +166,16 @@ namespace management_ui_library.Menus
                 {
                     Console.WriteLine("Your borrow history is empty.");
                     return;
+                    ///<summary>
+                    ///ლამბდა ფუნქცია ჩერდება: return; ეუბნება ლამბდას: "შენი საქმე მორჩა, ქვემოთ არსებული foreach ციკლი აღარ გაუშვა".
+
+                   /// მართვა უბრუნდება TryRun - ს: რადგან ლამბდა ფუნქციამ მუშაობა უშეცდომოდ(Exception - ის გარეშე) დაასრულა, TryRun გადადის თავისი კოდის მომდევნო ხაზზე.
+
+                   /// TryRun - იც ჩერდება: TryRun - ის შიგნით ეშვება return true; — ეს უკვე თვითონ TryRun მეთოდს ხურავს.
+
+                    /// მართვა უბრუნდება ShowMyRecords() - ს: რადგან TryRun-იც დაიხურა, ShowMyRecords() - იც სრულდება და მომხმარებელი ბრუნდება მთავარ მენიუში.
+                    
+                    ///</summary>
                 }
 
                 foreach (BorrowRecord r in records)
