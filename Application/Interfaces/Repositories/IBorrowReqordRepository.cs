@@ -1,25 +1,18 @@
-﻿using LibraryManagementSystem.Domain.Models;
-using System;
+using LibraryManagementSystem.Domain.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Interfaces.Repositories
 {
     public interface IBorrowReqordRepository
     {
-
-        void Add(BorrowRecord record);
+        Task InitializeAsync();
 
         BorrowRecord? GetById(int id);
+        List<BorrowRecord>? GetAll();
+        List<BorrowRecord>? GetByUserId(int userId);
 
-        List<BorrowRecord> ?  GetAll();
-
-        List<BorrowRecord> ? GetByUserId(int userId);
-        void Update(BorrowRecord record);
-
-
-        ///////// ჯერ უნდა გავაკეთო borrow request და მერე შეიქმნება რექორდი
+        Task AddAsync(BorrowRecord record);
+        Task UpdateAsync(BorrowRecord record);
     }
 }

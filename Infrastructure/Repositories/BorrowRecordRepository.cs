@@ -1,81 +1,55 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Domain.Exceptions;
 using LibraryManagementSystem.Domain.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LibraryManagementSystem.DataAccess.Repositories
 {
     public class BorrowRecordRepository : IBorrowReqordRepository
     {
         private readonly IFileRepository<BorrowRecord> _fileRepository;
-        private readonly List<BorrowRecord> _borrowRecords;
-
+        private List<BorrowRecord> _borrowRecords = new();
 
         public BorrowRecordRepository(IFileRepository<BorrowRecord> fileRepository)
         {
             _fileRepository = fileRepository;
+        }
 
-            _borrowRecords = _fileRepository.GetAllLine()
-                ?? new List<BorrowRecord>();
-
+        public async Task InitializeAsync()
+        {
+            _borrowRecords = await _fileRepository.GetAllLineAsync() ?? new List<BorrowRecord>();
             BorrowRecord.SyncIdCounter(_borrowRecords);
         }
 
-
-
-        public void Add(BorrowRecord record)
+        public async Task AddAsync(BorrowRecord record)
         {
             _borrowRecords.Add(record);
-
-            Save();
+            await SaveAsync();
         }
 
+        public List<BorrowRecord> GetAll() => _borrowRecords;
 
-
-        public List<BorrowRecord> GetAll()
-        {
-            return _borrowRecords;
-        }
-
-
-
-        public BorrowRecord GetById(int id)
-        {
-            return _borrowRecords
-                .FirstOrDefault(x => x.Id == id)
+        public BorrowRecord GetById(int id) =>
+            _borrowRecords.FirstOrDefault(x => x.Id == id)
                 ?? throw new RecordsDoNotExistsException();
-        }
 
+        public List<BorrowRecord> GetByUserId(int userId) =>
+            _borrowRecords.Where(x => x.UserId == userId).ToList();
 
-
-        public List<BorrowRecord> GetByUserId(int userId)
+        public async Task UpdateAsync(BorrowRecord record)
         {
-            return _borrowRecords
-                .Where(x => x.UserId == userId)
-                .ToList();
-        }
-
-
-
-        public void Update(BorrowRecord record)
-        {
-            int index = _borrowRecords
-                .FindIndex(x => x.Id == record.Id);
-
+            int index = _borrowRecords.FindIndex(x => x.Id == record.Id);
 
             if (index == -1)
                 throw new RecordsDoNotExistsException();
 
-
             _borrowRecords[index] = record;
 
-            Save();
+            await SaveAsync();
         }
 
-
-
-        private void Save()
-        {
-            _fileRepository.SaveAll(_borrowRecords);
-        }
+        private Task SaveAsync() => _fileRepository.SaveAllAsync(_borrowRecords);
     }
 }

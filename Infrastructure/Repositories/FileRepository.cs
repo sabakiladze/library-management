@@ -1,67 +1,74 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
-public class FileRepository<T> : IFileRepository<T>
+namespace Infrastructure.Repositories
 {
-    private readonly string _filePath;
-
-    public FileRepository(string fileName)
+    public class FileRepository<T> : IFileRepository<T>
     {
-        string directory = @"C:\Users\kilad\Downloads\library-management-fixed-v2\library-management\Infrastructure\Files";
+        private readonly string _filePath;
 
-        if (!Directory.Exists(directory))
+        public FileRepository(string fileName)
         {
-            Directory.CreateDirectory(directory);
+            string directory = @"C:\Users\kilad\Downloads\library-management-fixed-v2\library-management\Infrastructure\Files";
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            _filePath = Path.Combine(directory, fileName);
         }
 
-        _filePath = Path.Combine(directory, fileName);
-    }
-
-
-    public List<T> GetAllLine()
-    {
-        if (!File.Exists(_filePath))
-            return new List<T>();
-
-        try
+        public async Task<List<T>> GetAllLineAsync()
         {
-            string text = File.ReadAllText(_filePath);
+            if (!File.Exists(_filePath))
+                return new List<T>();
 
-            var options = new JsonSerializerOptions
+            try
             {
-                Converters =
+                string text = await File.ReadAllTextAsync(_filePath);
+
+                var options = new JsonSerializerOptions
                 {
-                    new JsonStringEnumConverter()
-                }
-            };
+                    Converters = { new JsonStringEnumConverter() }
+                };
 
-
-            return JsonSerializer.Deserialize<List<T>>(text, options)
-                   ?? new List<T>();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return new List<T>();
-        }
-    }
-
-
-    public void SaveAll(List<T> data)
-    {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Converters =
-            {
-                new JsonStringEnumConverter()
+                return JsonSerializer.Deserialize<List<T>>(text, options)
+                       ?? new List<T>();
             }
-        };
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[warning] Could not read {Path.GetFileName(_filePath)}: {ex.Message}");
+                return new List<T>();
+            }
+        }
 
+        public async Task SaveAllAsync(List<T> data)
+        {
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Converters = { new JsonStringEnumConverter() }
+                };
 
-        string json = JsonSerializer.Serialize(data, options);
+                string json = JsonSerializer.Serialize(data, options);
 
-        File.WriteAllText(_filePath, json);
+                await File.WriteAllTextAsync(_filePath, json);
+            }
+            catch (Exception ex)
+            {
+                // Previously this had no try-catch at all, so a locked/in-use file
+                // (e.g. antivirus or cloud-sync holding a lock) would either crash
+                // or, depending on the call site, silently swallow the write —
+                // which is exactly what "worked during the session, gone after
+                // restart" looks like. Now it's surfaced instead of hidden.
+                throw new IOException($"Failed to save {Path.GetFileName(_filePath)}: {ex.Message}", ex);
+            }
+        }
     }
 }

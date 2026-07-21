@@ -16,7 +16,7 @@ namespace LibraryManagementSystem.Domain.Models
         public int Id { get; private set; }
         private string _title = string.Empty;
         public Author Author { get; set; }
-        public int PublicationYear { get; set; }
+        private int _publicationYear;
         public List<BookCopy> Copies { get; set; } = new List<BookCopy>();
         public string Title
         {
@@ -26,6 +26,18 @@ namespace LibraryManagementSystem.Domain.Models
                 if (string.IsNullOrWhiteSpace(value))
                     throw new ArgumentException("Book title cannot be empty!");
                 _title = value;
+            }
+        }
+        public int PublicationYear
+        {
+            get => _publicationYear;
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("Publication year must be a positive number!");
+                if (value > DateTime.Now.Year)
+                    throw new ArgumentException($"Publication year can't be in the future (current year: {DateTime.Now.Year})!");
+                _publicationYear = value;
             }
         }
         public override bool Equals(object? obj)

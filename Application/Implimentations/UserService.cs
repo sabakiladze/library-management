@@ -1,13 +1,9 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Validations;
 using Domain.Exceptions;
 using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static LibraryManagementSystem.Domain.Enums.UserRole;
 
@@ -19,20 +15,32 @@ namespace Application.Implimentations
         private readonly IUserRepository _userRepository;
         private readonly Validation _validations;
 
-        public UserService( UserSession userservice, IUserRepository userrepository, Validation validation)
+        public UserService(UserSession userservice, IUserRepository userrepository, Validation validation)
         {
             _userRepository = userrepository;
             _userSession = userservice;
             _validations = validation;
         }
-        public void PromoteToAdmin(int userId)
+
+        public async Task PromoteToAdminAsync(int userId)
         {
             _validations.EnsureAdmin(_userSession);
-            User? user = _userRepository.GetUserById(userId) ?? throw new UserNotFound();
-            if(user.Role==Role.Admin) throw new UserIsAlreadyAdmin();
-            user.PromoteToAdmin();
-            _userRepository.Update(user);
 
+            User? user = _userRepository.GetUserById(userId) ?? throw new UserNotFound();
+
+            if (user.Role == Role.Admin)
+                throw new UserIsAlreadyAdmin();
+
+            user.PromoteToAdmin();
+
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public decimal GetMyFee()
+        {
+            _validations.EnsureLoggedIn(_userSession);
+
+            return _userSession.CurrentUser!.Fee ?? 0m;
         }
     }
 }

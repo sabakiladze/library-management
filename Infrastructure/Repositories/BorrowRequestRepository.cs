@@ -1,7 +1,9 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Domain.Exceptions;
 using Domain.Models;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Domain.Enums.BookBorrowRequestStatus;
 
 namespace Infrastructure.Repositories
@@ -9,110 +11,64 @@ namespace Infrastructure.Repositories
     public class BorrowRequestRepository : IBorrowRequestRepository
     {
         private readonly IFileRepository<BorrowRequest> _fileRepository;
-        private readonly List<BorrowRequest> _borrowRequests;
-
+        private List<BorrowRequest> _borrowRequests = new();
 
         public BorrowRequestRepository(IFileRepository<BorrowRequest> fileRepository)
         {
             _fileRepository = fileRepository;
-            _borrowRequests = _fileRepository.GetAllLine() ?? new List<BorrowRequest>();
+        }
 
+        public async Task InitializeAsync()
+        {
+            _borrowRequests = await _fileRepository.GetAllLineAsync() ?? new List<BorrowRequest>();
             BorrowRequest.SyncIdCounter(_borrowRequests);
         }
 
-
-
-        public void AddRequest(BorrowRequest request)
+        public async Task AddRequestAsync(BorrowRequest request)
         {
             _borrowRequests.Add(request);
-            Save();
+            await SaveAsync();
         }
 
-
-
-        public void DeleteRequest(int id)
+        public async Task DeleteRequestAsync(int id)
         {
-            var request = GetRequestById(id);
+            var request = GetRequestById(id) ?? throw new RequestByThisIdDoNotExists();
 
             _borrowRequests.Remove(request);
 
-            Save();
+            await SaveAsync();
         }
 
+        public List<BorrowRequest> GetAllRequests() => _borrowRequests;
 
+        public List<BorrowRequest> GetApprovedRequests() =>
+            _borrowRequests.Where(x => x.Status == BookBorrowStatus.Approved).ToList();
 
-        public List<BorrowRequest> GetAllRequests()
-        {
-            return _borrowRequests;
-        }
+        public List<BorrowRequest> GetPendingRequests() =>
+            _borrowRequests.Where(x => x.Status == BookBorrowStatus.Pending).ToList();
 
+        public List<BorrowRequest> GetRejectedRequests() =>
+            _borrowRequests.Where(x => x.Status == BookBorrowStatus.Rejected).ToList();
 
+        public List<BorrowRequest> GetRequestsByUserId(int userId) =>
+            _borrowRequests.Where(x => x.UserId == userId).ToList();
 
-        public List<BorrowRequest> GetApprovedRequests()
-        {
-            return _borrowRequests
-                .Where(x => x.Status == BookBorrowStatus.Approved)
-                .ToList();
-        }
-
-
-
-        public List<BorrowRequest> GetPendingRequests()
-        {
-            return _borrowRequests
-                .Where(x => x.Status == BookBorrowStatus.Pending)
-                .ToList();
-        }
-
-
-
-        public List<BorrowRequest> GetRejectedRequests()
-        {
-            return _borrowRequests
-                .Where(x => x.Status == BookBorrowStatus.Rejected)
-                .ToList();
-        }
-
-
-
-        public List<BorrowRequest> GetRequestsByUserId(int userId)
-        {
-            return _borrowRequests
-                .Where(x => x.UserId == userId)
-                .ToList();
-        }
-
-
-
-        public BorrowRequest GetRequestById(int id)
-        {
-            return _borrowRequests
-                .FirstOrDefault(x => x.Id == id)
+        public BorrowRequest GetRequestById(int id) =>
+            _borrowRequests.FirstOrDefault(x => x.Id == id)
                 ?? throw new RequestByThisIdDoNotExists();
-        }
 
-
-
-        public void Update(BorrowRequest request)
+        public async Task UpdateAsync(BorrowRequest request)
         {
-            var index = _borrowRequests
-                .FindIndex(x => x.Id == request.Id);
-
+            var index = _borrowRequests.FindIndex(x => x.Id == request.Id);
 
             if (index == -1)
                 throw new RequestByThisIdDoNotExists();
 
-
             _borrowRequests[index] = request;
 
-            Save();
+            await SaveAsync();
         }
 
-
-
-        private void Save()
-        {
-            _fileRepository.SaveAll(_borrowRequests);
-        }
+        private Task SaveAsync() => _fileRepository.SaveAllAsync(_borrowRequests);
     }
 }

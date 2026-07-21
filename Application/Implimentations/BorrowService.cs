@@ -1,9 +1,13 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Validations;
 using Domain.Exceptions;
 using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using static Domain.Enums.BookBorrowRequestStatus;
 using static LibraryManagementSystem.Domain.Enums.BookStatus;
 
@@ -17,7 +21,6 @@ namespace Application.Implimentations
         private readonly IBorrowReqordRepository _borrowRecordRepo;
         private readonly IBookRepository _bookRepository;
         private readonly IUserRepository _userRepository;
-
 
         public BorrowService(
             Validation validation,
@@ -35,43 +38,30 @@ namespace Application.Implimentations
             _userRepository = userRepository;
         }
 
-
-
-        public void ApproveRequest(int requestId)
+        public async Task ApproveRequestAsync(int requestId)
         {
             _validations.EnsureAdmin(_userSession);
-
 
             BorrowRequest request =
                 _borrowRequestRepo.GetRequestById(requestId)
                 ?? throw new RequestByThisIdDoNotExists();
 
-
             if (request.Status != BookBorrowStatus.Pending)
                 throw new InvalidOperationException("Request already processed");
-
 
             BookCopy copy =
                 _bookRepository.GetBookCopyByGuid(request.BookCopyId)
                 ?? throw new BookNotFoundException();
 
-
             copy.Borrow();
 
+            Book book = _bookRepository.GetBookContainingCopy(copy.Id);
 
-            Book book =
-                _bookRepository.GetBookContainingCopy(copy.Id);
-
-
-            _bookRepository.Update(book);
-
-
+            await _bookRepository.UpdateAsync(book);
 
             request.Approve();
 
-            _borrowRequestRepo.Update(request);
-
-
+            await _borrowRequestRepo.UpdateAsync(request);
 
             BorrowRecord record = new(
                 request.UserId,
@@ -79,22 +69,15 @@ namespace Application.Implimentations
                 request.BookCopyId
             );
 
-
-            _borrowRecordRepo.Add(record);
+            await _borrowRecordRepo.AddAsync(record);
         }
-
-
-
 
         public List<BorrowRecord>? GetMyRecords()
         {
             _validations.EnsureLoggedIn(_userSession);
 
-            return _borrowRecordRepo
-                .GetByUserId(_userSession.CurrentUser!.Id);
+            return _borrowRecordRepo.GetByUserId(_userSession.CurrentUser!.Id);
         }
-
-
 
         public List<BorrowRequest>? GetMyRequests()
         {
@@ -105,9 +88,6 @@ namespace Application.Implimentations
                 ?? throw new InvalidUserIdOrUserHasNotHaveAnyRequestsYetException();
         }
 
-
-
-
         public List<BorrowRequest>? GetPendingRequests()
         {
             _validations.EnsureAdmin(_userSession);
@@ -115,34 +95,23 @@ namespace Application.Implimentations
             return _borrowRequestRepo.GetPendingRequests();
         }
 
-
-
-
-
-        public void RejectRequest(int requestId)
+        public async Task RejectRequestAsync(int requestId)
         {
             _validations.EnsureAdmin(_userSession);
-
 
             BorrowRequest request =
                 _borrowRequestRepo.GetRequestById(requestId)
                 ?? throw new RequestByThisIdDoNotExists();
 
-
             if (request.Status != BookBorrowStatus.Pending)
                 throw new InvalidOperationException("Request already processed");
 
-
             request.Reject();
 
-
-            _borrowRequestRepo.Update(request);
+            await _borrowRequestRepo.UpdateAsync(request);
         }
 
-
-
-
-        public void CancelRequest(int requestId)
+        public async Task CancelRequestAsync(int requestId)
         {
             _validations.EnsureLoggedIn(_userSession);
 
@@ -162,14 +131,10 @@ namespace Application.Implimentations
 
             request.Cancel();
 
-            _borrowRequestRepo.Update(request);
+            await _borrowRequestRepo.UpdateAsync(request);
         }
 
-
-
-
-
-        public void RequestBook(int bookId)
+        public async Task RequestBookAsync(int bookId)
         {
             _validations.EnsureLoggedIn(_userSession);
 
@@ -177,25 +142,17 @@ namespace Application.Implimentations
                 _userRepository.GetUserById(_userSession.CurrentUser!.Id)
                 ?? throw new UserNotFound();
 
-
             if (user.HasDebt())
                 throw new UserMustPayFineFirst();
-
-
 
             Book book =
                 _bookRepository.GetBookById(bookId)
                 ?? throw new BookNotFoundException();
 
-
-
             BookCopy copy =
                 book.Copies.FirstOrDefault(x =>
                     x.Status == Book_Status.Available)
                 ?? throw new BookOutOfRangeException();
-
-
-
 
             BorrowRequest request = new(
                 user.Id,
@@ -203,16 +160,10 @@ namespace Application.Implimentations
                 copy.Id
             );
 
-
-
-            _borrowRequestRepo.AddRequest(request);
+            await _borrowRequestRepo.AddRequestAsync(request);
         }
 
-
-
-
-
-        public void ReturnBook(int recordId)
+        public async Task ReturnBookAsync(int recordId)
         {
             _validations.EnsureLoggedIn(_userSession);
 
@@ -220,49 +171,28 @@ namespace Application.Implimentations
                 _borrowRecordRepo.GetById(recordId)
                 ?? throw new Exception("Record not found");
 
-
-
             if (record.UserId != _userSession.CurrentUser!.Id)
                 throw new UnauthorizedAccessException();
 
-
-
             if (record.IsReturned)
                 throw new InvalidOperationException("Book already returned");
-
-
 
             BookCopy copy =
                 _bookRepository.GetBookCopyByGuid(record.BookCopyId)
                 ?? throw new BookNotFoundException();
 
-
-
             decimal fee = record.CalculateFee();
             record.ChargeFee(fee);
 
-
-
             copy.Return();
 
+            Book book = _bookRepository.GetBookContainingCopy(copy.Id);
 
-
-            Book book =
-                _bookRepository.GetBookContainingCopy(copy.Id);
-
-
-            _bookRepository.Update(book);
-
-
-
+            await _bookRepository.UpdateAsync(book);
 
             record.ReturnBook();
 
-
-            _borrowRecordRepo.Update(record);
-
-
-
+            await _borrowRecordRepo.UpdateAsync(record);
 
             if (fee > 0)
             {
@@ -270,11 +200,9 @@ namespace Application.Implimentations
                     _userRepository.GetUserById(record.UserId)
                     ?? throw new UserNotFound();
 
-
                 user.AddFee(fee);
 
-
-                _userRepository.Update(user);
+                await _userRepository.UpdateAsync(user);
             }
         }
     }

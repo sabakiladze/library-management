@@ -1,12 +1,9 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Domain.Exceptions;
 using LibraryManagementSystem.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace LibraryManagementSystem.DataAccess.Repositories
@@ -14,28 +11,33 @@ namespace LibraryManagementSystem.DataAccess.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly IFileRepository<User> _fileRepository;
-        private readonly List<User> _users;
+        private List<User> _users = new();
+
         public UserRepository(IFileRepository<User> file)
         {
             _fileRepository = file;
-            _users = _fileRepository.GetAllLine() ?? new List<User>();
+        }
+
+        public async Task InitializeAsync()
+        {
+            _users = await _fileRepository.GetAllLineAsync() ?? new List<User>();
             User.SyncIdCounter(_users);
         }
-       
-        public List<User> ?GetAll() => _users;
+
+        public List<User>? GetAll() => _users;
 
         public User? GetUserByEmail(string email) =>
             _users.FirstOrDefault(x =>
                 x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 
-        public User ? GetUserById(int id) => _users.FirstOrDefault(x => x.Id == id);
+        public User? GetUserById(int id) => _users.FirstOrDefault(x => x.Id == id);
 
         public List<User> GetUserByName(string name) =>
             _users.Where(x =>
                 x.UserName.Equals(name, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        public void Update(User user)
+        public async Task UpdateAsync(User user)
         {
             int index = _users.FindIndex(x => x.Id == user.Id);
 
@@ -44,27 +46,24 @@ namespace LibraryManagementSystem.DataAccess.Repositories
 
             _users[index] = user;
 
-            Save();
-
+            await SaveAsync();
         }
-        public void Delete(int id)
+
+        public async Task DeleteAsync(int id)
         {
             var user = GetUserById(id) ?? throw new UserNotFound();
 
             _users.Remove(user);
 
-            Save();
+            await SaveAsync();
         }
-        public void Add(User user)
+
+        public async Task AddAsync(User user)
         {
             _users.Add(user);
-            Save();
-        }
-        private void Save()
-        {
-            _fileRepository.SaveAll(_users);
+            await SaveAsync();
         }
 
-
+        private Task SaveAsync() => _fileRepository.SaveAllAsync(_users);
     }
 }

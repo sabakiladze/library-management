@@ -5,6 +5,7 @@ using management_ui_library.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static LibraryManagementSystem.Domain.Enums.BookStatus;
 
 namespace management_ui_library.Menus
@@ -14,21 +15,24 @@ namespace management_ui_library.Menus
         private readonly IBookService _bookService;
         private readonly IBorrowService _borrowService;
         private readonly IAuthService _authService;
+        private readonly IUserService _userService;
         private readonly UserSession _userSession;
 
         public UserMenu(
             IBookService bookService,
             IBorrowService borrowService,
             IAuthService authService,
+            IUserService userService,
             UserSession userSession)
         {
             _bookService = bookService;
             _borrowService = borrowService;
             _authService = authService;
+            _userService = userService;
             _userSession = userSession;
         }
 
-        public void Run()
+        public async Task Run()
         {
             while (_userSession.IsLoggedIn)
             {
@@ -47,7 +51,10 @@ namespace management_ui_library.Menus
                 Console.WriteLine("7. Cancel a request (while still Pending)");
                 Console.WriteLine("8. My active/past borrow records");
                 Console.WriteLine("9. Return a book");
+                Console.WriteLine("10. My fee");
+                Console.WriteLine("11. Delete my account");
                 Console.WriteLine("0. Log out");
+                Console.WriteLine("(tip: type 'cancel' at any prompt to back out of a multi-step action)");
 
                 string choice = ConsoleHelper.ReadLineOrEmpty("Choose: ");
 
@@ -57,11 +64,13 @@ namespace management_ui_library.Menus
                     case "2": SearchByName(); break;
                     case "3": SearchByAuthor(); break;
                     case "4": SearchByYear(); break;
-                    case "5": RequestBook(); break;
+                    case "5": await RequestBook(); break;
                     case "6": ShowMyRequests(); break;
-                    case "7": CancelRequest(); break;
+                    case "7": await CancelRequest(); break;
                     case "8": ShowMyRecords(); break;
-                    case "9": ReturnBook(); break;
+                    case "9": await ReturnBook(); break;
+                    case "10": ShowMyFee(); break;
+                    case "11": await DeleteAccount(); break;
                     case "0": _authService.LogOut(); break;
                     default: ConsoleHelper.PrintError("Invalid menu option."); break;
                 }
@@ -112,12 +121,14 @@ namespace management_ui_library.Menus
             }
         }
 
-        private void RequestBook()
+        private async Task RequestBook()
         {
-            int bookId = ConsoleHelper.ReadInt("Book ID (see catalog): ");
-
-            if (ConsoleHelper.TryRun(() => _borrowService.RequestBook(bookId)))
+            await ConsoleHelper.RunWithRetryAsync(async () =>
+            {
+                int bookId = ConsoleHelper.ReadInt("Book ID (see catalog): ");
+                await _borrowService.RequestBookAsync(bookId);
                 ConsoleHelper.PrintSuccess("Request sent. Wait for admin approval.");
+            });
         }
 
         private void ShowMyRequests()
@@ -136,12 +147,14 @@ namespace management_ui_library.Menus
             });
         }
 
-        private void CancelRequest()
+        private async Task CancelRequest()
         {
-            int requestId = ConsoleHelper.ReadInt("ID of the request to cancel: ");
-
-            if (ConsoleHelper.TryRun(() => _borrowService.CancelRequest(requestId)))
+            await ConsoleHelper.RunWithRetryAsync(async () =>
+            {
+                int requestId = ConsoleHelper.ReadInt("ID of the request to cancel: ");
+                await _borrowService.CancelRequestAsync(requestId);
                 ConsoleHelper.PrintSuccess("Request cancelled.");
+            });
         }
 
         private void ShowMyRecords()
@@ -166,12 +179,41 @@ namespace management_ui_library.Menus
             });
         }
 
-        private void ReturnBook()
+        private async Task ReturnBook()
         {
-            int recordId = ConsoleHelper.ReadInt("Record ID (see my records): ");
-
-            if (ConsoleHelper.TryRun(() => _borrowService.ReturnBook(recordId)))
+            await ConsoleHelper.RunWithRetryAsync(async () =>
+            {
+                int recordId = ConsoleHelper.ReadInt("Record ID (see my records): ");
+                await _borrowService.ReturnBookAsync(recordId);
                 ConsoleHelper.PrintSuccess("Book returned.");
+            });
+        }
+
+        private void ShowMyFee()
+        {
+            ConsoleHelper.TryRun(() =>
+            {
+                decimal fee = _userService.GetMyFee();
+                if (fee > 0)
+                    ConsoleHelper.PrintError($"Your outstanding fee: {fee:0.00}");
+                else
+                    ConsoleHelper.PrintSuccess("You have no outstanding fee.");
+            });
+        }
+
+        private async Task DeleteAccount()
+        {
+            ConsoleHelper.PrintError("This will permanently delete your account. This cannot be undone.");
+            bool confirmed = ConsoleHelper.ReadTypedConfirmation("Type YES to confirm: ");
+
+            if (!confirmed)
+            {
+                Console.WriteLine("Cancelled — your account was not deleted.");
+                return;
+            }
+
+            if (await ConsoleHelper.TryRunAsync(() => _authService.DeleteAccountAsync()))
+                ConsoleHelper.PrintSuccess("Your account has been deleted.");
         }
     }
 }

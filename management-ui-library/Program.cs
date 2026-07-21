@@ -1,4 +1,4 @@
-﻿using Application.Implementations;
+using Application.Implementations;
 using Application.Implimentations;
 using Application.Validations;
 using Domain.Models;
@@ -8,22 +8,18 @@ using LibraryManagementSystem.DataAccess.Repositories;
 using LibraryManagementSystem.Domain.Models;
 using management_ui_library.Menus;
 using Microsoft.Extensions.Configuration;
-
-
+using System.Threading.Tasks;
 
 namespace management_ui_library
 {
     public class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-
-
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-           
             EmailSettings settings = new()
             {
                 Email = configuration["EmailSettings:Email"],
@@ -32,17 +28,15 @@ namespace management_ui_library
                 Port = int.Parse(configuration["EmailSettings:Port"])
             };
 
-
             EmailService emailService = new(settings);
 
-            UserSession userSession=new();
+            UserSession userSession = new();
 
             FileRepository<User> userFileRepo = new("UsersBase.txt");
             FileRepository<Book> bookFileRepo = new("BookStorage.txt");
             FileRepository<LogInLog> logFileRepo = new("LogginInfo.txt");
             FileRepository<BorrowRecord> recordFileRepo = new("BorrowRecordInfo.txt");
             FileRepository<BorrowRequest> requestFileRepo = new("BorrowRequestInfo.txt");
-
 
             Validation validation = new();
 
@@ -51,18 +45,25 @@ namespace management_ui_library
             BorrowRecordRepository recordRepo = new(recordFileRepo);
             BorrowRequestRepository requestRepo = new(requestFileRepo);
 
+            // Repositories load their in-memory lists from disk here. This has
+            // to happen once, up front, before anything tries to read/write —
+            // constructors can't be async in C#, so the load is a separate step.
+            await userRepo.InitializeAsync();
+            await bookRepo.InitializeAsync();
+            await recordRepo.InitializeAsync();
+            await requestRepo.InitializeAsync();
 
             AuthService authService = new(userRepo, userSession, logFileRepo, emailService);
-            BookService bookService = new(bookRepo, userSession,validation);
+            BookService bookService = new(bookRepo, userSession, validation);
 
             BorrowService borrowSerice = new(validation, userSession, requestRepo, recordRepo, bookRepo, userRepo);
             UserService userService = new(userSession, userRepo, validation);
 
-            UserMenu userMenu = new(bookService, borrowSerice, authService, userSession);
+            UserMenu userMenu = new(bookService, borrowSerice, authService, userService, userSession);
             AdminMenu adminMenu = new(bookService, borrowSerice, userService, authService, userSession);
             Menu menu = new(authService, userSession, userMenu, adminMenu);
 
-            menu.Run();
+            await menu.Run();
         }
     }
 }

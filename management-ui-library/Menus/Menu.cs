@@ -2,6 +2,7 @@ using Application.Interfaces.Services;
 using Domain.Models;
 using management_ui_library.Utils;
 using System;
+using System.Threading.Tasks;
 using static LibraryManagementSystem.Domain.Enums.UserRole;
 
 namespace management_ui_library.Menus
@@ -25,7 +26,7 @@ namespace management_ui_library.Menus
             _adminMenu = adminMenu;
         }
 
-        public void Run()
+        public async Task Run()
         {
             Console.WriteLine("=== Library Management System ===");
 
@@ -34,7 +35,7 @@ namespace management_ui_library.Menus
             {
                 if (_userSession.IsLoggedIn)
                 {
-                    RouteToRoleMenu();
+                    await RouteToRoleMenu();
                     continue;
                 }
 
@@ -47,9 +48,9 @@ namespace management_ui_library.Menus
 
                 switch (choice)
                 {
-                    case "1": Register(); break;
-                    case "2": Login(); break;
-                    case "3": VerifyEmail(); break;
+                    case "1": await Register(); break;
+                    case "2": await Login(); break;
+                    case "3": await VerifyEmail(); break;
                     case "0": exit = true; break;
                     default: ConsoleHelper.PrintError("Invalid menu option."); break;
                 }
@@ -58,42 +59,50 @@ namespace management_ui_library.Menus
             Console.WriteLine("Goodbye!");
         }
 
-        private void RouteToRoleMenu()
+        private async Task RouteToRoleMenu()
         {
             if (_userSession.CurrentUser!.Role == Role.Admin)
-                _adminMenu.Run();
+                await _adminMenu.Run();
             else
-                _userMenu.Run();
+                await _userMenu.Run();
         }
 
-        private void Register()
+        private async Task Register()
         {
-            string username = ConsoleHelper.ReadNonEmpty("Username: ");
-            string email = ConsoleHelper.ReadNonEmpty("Email: ");
-            string password = ConsoleHelper.ReadNonEmpty("Password: ");
-
-            if (ConsoleHelper.TryRun(() => _authService.SignUp(username, email, password)))
+            await ConsoleHelper.RunWithRetryAsync(async () =>
             {
+                string username = ConsoleHelper.ReadNonEmpty("Username (or 'cancel'): ");
+                string email = ConsoleHelper.ReadNonEmpty("Email (or 'cancel'): ");
+                string password = ConsoleHelper.ReadNonEmpty("Password (or 'cancel'): ");
+
+                await _authService.SignUpAsync(username, email, password);
+
                 ConsoleHelper.PrintSuccess("Registration successful. A verification code has been sent to your email.");
                 Console.WriteLine("Note: if email isn't actually configured (in appsettings.json), sending the code will fail — contact the admin/developer.");
-            }
+            });
         }
 
-        private void VerifyEmail()
+        private async Task VerifyEmail()
         {
-            string email = ConsoleHelper.ReadNonEmpty("Email: ");
-            string code = ConsoleHelper.ReadNonEmpty("Verification code: ");
+            await ConsoleHelper.RunWithRetryAsync(async () =>
+            {
+                string email = ConsoleHelper.ReadNonEmpty("Email (or 'cancel'): ");
+                string code = ConsoleHelper.ReadNonEmpty("Verification code (or 'cancel'): ");
 
-            if (ConsoleHelper.TryRun(() => _authService.VerifyEmail(email, code)))
+                await _authService.VerifyEmailAsync(email, code);
                 ConsoleHelper.PrintSuccess("Email verified. You can now log in.");
+            });
         }
 
-        private void Login()
+        private async Task Login()
         {
-            string email = ConsoleHelper.ReadNonEmpty("Email: ");
-            string password = ConsoleHelper.ReadNonEmpty("Password: ");
+            await ConsoleHelper.RunWithRetryAsync(async () =>
+            {
+                string email = ConsoleHelper.ReadNonEmpty("Email (or 'cancel'): ");
+                string password = ConsoleHelper.ReadNonEmpty("Password (or 'cancel'): ");
 
-            ConsoleHelper.TryRun(() => _authService.LogIn(email, password));
+                await _authService.LogInAsync(email, password);
+            });
         }
     }
 }

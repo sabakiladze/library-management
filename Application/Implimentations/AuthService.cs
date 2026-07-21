@@ -1,8 +1,11 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Application.Implimentations
 {
@@ -18,35 +21,29 @@ namespace Application.Implimentations
         private readonly IEmailService _emailService = emailService;
 
 
-        public void LogIn(string email, string password)
+        public async Task LogInAsync(string email, string password)
         {
             User user = _userRepository.GetUserByEmail(email)
                 ?? throw new AccountByThisEmailDoNotExists();
 
-
             if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
                 throw new IncorrectPasswordException();
-
 
             if (!user.IsEmailVerified)
                 throw new EmailNotVerified("Please verify your email first");
 
-
             _userSession.CurrentUser = user;
-
 
             LogInLog log = new(email);
 
-            List<LogInLog> logs = _logFileRepository.GetAllLine();
+            List<LogInLog> logs = await _logFileRepository.GetAllLineAsync();
 
             logs.Add(log);
 
-            _logFileRepository.SaveAll(logs);
-
+            await _logFileRepository.SaveAllAsync(logs);
 
             Console.WriteLine("Successfully logged in");
         }
-
 
 
         public void LogOut()
@@ -57,17 +54,12 @@ namespace Application.Implimentations
         }
 
 
-
-
-
-        public void SignUp(string username, string email, string password)
+        public async Task SignUpAsync(string username, string email, string password)
         {
             if (_userRepository.GetUserByEmail(email) != null)
                 throw new EmailAlreadyIsInUseException();
 
-
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
 
             User user = new(
                 username,
@@ -75,60 +67,45 @@ namespace Application.Implimentations
                 passwordHash
             );
 
-
             user.GenerateVerificationCode();
 
-
-            _userRepository.Add(user);
-
+            await _userRepository.AddAsync(user);
 
             _emailService.SendVerificationCode(
                 user.Email,
                 user.VerificationCode!
             );
 
-
             Console.WriteLine("Signed up successfully. Check your email.");
         }
 
 
-
-        public void VerifyEmail(string email, string code)
+        public async Task VerifyEmailAsync(string email, string code)
         {
             User user = _userRepository.GetUserByEmail(email)
                 ?? throw new AccountByThisEmailDoNotExists();
 
-
             if (!user.IsVerificationCodeValid(code))
                 throw new Exception("Wrong or expired verification code");
 
-
             user.VerifyEmail();
 
-
-            _userRepository.Update(user);
-
+            await _userRepository.UpdateAsync(user);
 
             Console.WriteLine("Email verified successfully");
         }
 
 
-
-        public void DeleteAccount()
+        public async Task DeleteAccountAsync()
         {
             User user = _userSession.CurrentUser
                 ?? throw new UnauthorizedAccessException();
 
-
-            _userRepository.Delete(user.Id);
-
+            await _userRepository.DeleteAsync(user.Id);
 
             _userSession.CurrentUser = null;
 
-
             Console.WriteLine("Account deleted successfully");
         }
-
-       
     }
 }
