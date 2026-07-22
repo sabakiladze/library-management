@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Domain.Models;
 using LibraryManagementSystem.Domain.Models;
 
-namespace Application.Interfaces.Repositories
+namespace Domain.Interfaces.Repositories
 {
     public interface IBookRepository
     {

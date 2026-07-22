@@ -2,7 +2,7 @@ using LibraryManagementSystem.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Application.Interfaces.Repositories
+namespace Domain.Interfaces.Repositories
 {
     public interface IBorrowReqordRepository
     {

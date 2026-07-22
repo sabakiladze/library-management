@@ -37,7 +37,9 @@ namespace Infrastructure.Services
             };
             message.To.Add(email);
             message.Subject = "Email Verification";
-            message.Body = $"Your verification code is: {code}";
+            message.IsBodyHtml = true;
+            string htmlTemplate = File.ReadAllText("email-template.html");
+            message.Body = htmlTemplate.Replace("{CODE}", code);
             smtp.Send(message);
 
         }

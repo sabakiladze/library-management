@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Domain.Exceptions;
+using Domain.Interfaces.Repositories;
 using LibraryManagementSystem.Domain.Models;
 using System.Collections.Generic;
 using System.Linq;
